@@ -1,0 +1,28 @@
+FROM quay.io/sclorg/postgresql-16-c10s
+
+COPY ./edb-pg16-aidb-2.1.1-1.el9.x86_64.rpm .
+COPY ./edb-pg16-pgfs-1.0.6-1.el9.x86_64.rpm .
+COPY ./edb-pg16-pgvector0-0.8.0-3.el9.x86_64.rpm .
+COPY ./dvdrental.tar .
+
+USER root
+
+RUN dnf install -y ./edb-pg16-pgvector0-0.8.0-3.el9.x86_64.rpm && \
+      dnf install -y ./edb-pg16-aidb-2.1.1-1.el9.x86_64.rpm && \
+      dnf install -y ./edb-pg16-pgfs-1.0.6-1.el9.x86_64.rpm && \
+      dnf clean all
+
+#These are the commands to install the extensions by package name versus rpm file name
+#RUN dnf install -y edb-pg16-pgvector0 && \
+#       dnf install -y edb-pg16-aidb && \
+#       dnf install -y edb-pg16-pgfs && \
+#       dnf clean all
+
+#Copy control files, sql and shared objects to expected location
+RUN cp ./usr/pgsql-16/share/extension/aidb.control /usr/share/pgsql/extension/aidb.control && \
+    cp ./usr/pgsql-16/share/extension/pgfs.control /usr/share/pgsql/extension/pgfs.control && \
+    cp ./usr/pgsql-16/share/extension/vector.control /usr/share/pgsql/extension/vector.control && \
+    cp ./usr/pgsql-16/share/extension/*.sql /usr/share/pgsql/extension/* && \
+    cp ./usr/pgsql-16/lib/* /usr/share/pgsql/lib/*
+
+USER 26

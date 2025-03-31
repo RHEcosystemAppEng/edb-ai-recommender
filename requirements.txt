@@ -1,0 +1,8 @@
+Pillow
+streamlit
+#psycopg2
+numpy
+psycopg2-binary
+SQLAlchemy
+pandas 
+boto3
