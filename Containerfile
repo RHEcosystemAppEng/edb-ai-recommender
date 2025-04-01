@@ -16,7 +16,6 @@ USER appuser
 WORKDIR /home/appuser
 
 RUN git clone https://github.com/RHEcosystemAppEng/edb-ai-recommender.git app
-COPY sltest.py /home/appuser
 
 ENV VIRTUAL_ENV=/home/appuser/venv
 RUN virtualenv ${VIRTUAL_ENV}
