@@ -13,6 +13,8 @@ def get_db_connection_string():
 
     postgres_uri = f"postgresql://{postgres_user}:{postgres_pwd}@{postgres_host_port}/{postgres_db_name}"
 
+    print(f"postgresuri: {postgres_uri}")
+
     return postgres_uri
 
 def create_db_connection():
