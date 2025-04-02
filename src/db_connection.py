@@ -2,16 +2,16 @@ import psycopg2
 import os
 import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("app.log"),
-        logging.StreamHandler()
-    ]
-)
-
 def get_db_connection_string():
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler("app.log"),
+            logging.StreamHandler()
+        ]
+    )
 
     postgres_host_port = os.getenv("EDB_AIDB_PORT")
     postgres_host_port = postgres_host_port.replace("tcp://", "")
