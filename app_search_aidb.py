@@ -12,6 +12,15 @@ from botocore.handlers import disable_signing
 
 from src.db_connection import create_db_connection, get_db_connection_string
 from src.s3_connection import get_s3_connection_profile
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
 
 # Custom Header Section
 logo_path = "src/edb_new.png"
@@ -252,7 +261,9 @@ with left_column:
             st.subheader(product["name"])
             if product["image_path"]:
                 # Display the image if the path is not None or empty
-                st.image(product["image_path"], width=150)
+                image_name = os.path.basename(product["image_path"])
+                display_image_s3(image_name)
+                #st.image(product["image_path"], width=150)
             else:
                 st.write("No image available")
 with right_column:

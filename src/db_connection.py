@@ -4,14 +4,6 @@ import logging
 
 def get_db_connection_string():
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler()
-        ]
-    )
-
     postgres_host_port = os.getenv("EDB_AIDB_PORT")
     postgres_host_port = postgres_host_port.replace("tcp://", "")
     postgres_host_port = postgres_host_port.replace("http://", "")
@@ -21,8 +13,6 @@ def get_db_connection_string():
     postgres_db_name = os.getenv("DATABASE_NAME")
 
     postgres_uri = f"postgresql://{postgres_user}:{postgres_pwd}@{postgres_host_port}/{postgres_db_name}"
-
-    logging.info(f"HERE!!!{postgres_uri}")
 
     return postgres_uri
 
