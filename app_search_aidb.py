@@ -37,8 +37,8 @@ st.markdown(header_css, unsafe_allow_html=True)
 
 col1, col2 = st.columns([1, 4])
 
-with col1:
-    st.image(logo_path, width=150)
+#with col1:
+#    st.image(logo_path, width=150)
 
 with col2:
     st.markdown(

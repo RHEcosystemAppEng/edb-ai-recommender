@@ -9,5 +9,5 @@ data:
   s3-endpoint-url: "https://minio-api-minio.apps.ai-dev02.kni.syseng.devcluster.openshift.com"
   s3-bucket-name: "edb-aidb"
   s3-region: "us-east-1"
-  s3-skip-signature: 'true'
-  s3-recommender-images-path='recommender_images'
+  s3-skip-signature: "true"
+  s3-recommender-images-path: "recommender_images"

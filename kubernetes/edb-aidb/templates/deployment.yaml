@@ -11,16 +11,26 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-       app.kubernetes.io/name: ai-recommender-database
+       app.kubernetes.io/name: edb-aidb
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: ai-recommender-database
+        app.kubernetes.io/name: edb-aidb
     spec:
       containers:
-        - name: ai-recommender-database
+        - name: edb-aidb
           image: 'docker.io/psamouelian/edb-aidb@sha256:1c398ac0ac7870d5a168cdd88f8e618aa6965f68bb96bb85b33d6436e5379d7a'
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - >
+                    sleep 10;
+                    psql -c 'create extension aidb cascade;';
+                    psql -c 'create extension pgfs cascade;';
           ports:
             - containerPort: 5432
               protocol: TCP
