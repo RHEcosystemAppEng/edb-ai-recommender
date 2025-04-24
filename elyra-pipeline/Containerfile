@@ -1,0 +1,15 @@
+FROM quay.io/modh/runtime-images@sha256:a6e87550d7f932732b8e52c309d356fb76ae0ba0fd0b8566de0ba4ff49c2db84
+
+# Set environment variables to avoid Python buffering issues and enable pip no-cache
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Install required Python packages
+RUN pip install --upgrade pip && \
+    pip install \
+        numpy \
+        psycopg2 \
+        psycopg2-binary \
+        SQLAlchemy \
+        pandas \
+        boto3
