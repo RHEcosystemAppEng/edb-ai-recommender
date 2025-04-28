@@ -149,8 +149,11 @@
           "app_data": {
             "component_parameters": {
               "dependencies": [
-                "images.tar.gz",
-                "s3_utilities.py"
+                "s3_utilities.py",
+                "images.tar.partaa",
+                "images.tar.partab",
+                "images.tar.partac",
+                "images.tar.partad"
               ],
               "include_subdirectories": true,
               "outputs": [],
@@ -196,7 +199,7 @@
             "ui_data": {
               "label": "upload_images.ipynb",
               "image": "/notebook/samouelian-edb-ai/edb-aidb-workbench/static/elyra/notebook.svg",
-              "x_pos": 424,
+              "x_pos": 423,
               "y_pos": 382,
               "description": "Run notebook file"
             }
@@ -399,8 +402,8 @@
             "ui_data": {
               "label": "compute_text_embeddings.ipynb",
               "image": "/notebook/samouelian-edb-ai/edb-aidb-workbench/static/elyra/notebook.svg",
-              "x_pos": 942,
-              "y_pos": 211,
+              "x_pos": 940,
+              "y_pos": 213,
               "description": "Run notebook file"
             }
           },
@@ -499,7 +502,7 @@
               "label": "compute_image_embeddings.ipynb",
               "image": "/notebook/samouelian-edb-ai/edb-aidb-workbench/static/elyra/notebook.svg",
               "x_pos": 1143,
-              "y_pos": 352,
+              "y_pos": 349,
               "description": "Run notebook file"
             }
           },
@@ -644,8 +647,8 @@
           "comments": [
             {
               "id": "df18dc95-6129-4ffd-a5ff-dc346e3afdf1",
-              "x_pos": 30,
-              "y_pos": 50,
+              "x_pos": 38,
+              "y_pos": 49,
               "width": 175,
               "height": 86,
               "content": "Create EDB AI extensions and schema objects for EDB's recommender application.",
@@ -748,15 +751,15 @@
           "name": "init-recommender",
           "runtime": "Data Science Pipelines",
           "pipeline_defaults": {
-            "kubernetes_shared_mem_size": {
-              "size": 7
-            },
             "kubernetes_pod_labels": [],
             "mounted_volumes": [],
             "kubernetes_tolerations": [],
             "kubernetes_pod_annotations": [],
-            "env_vars": [],
+            "kubernetes_shared_mem_size": {
+              "size": 7
+            },
             "kubernetes_secrets": [],
+            "env_vars": [],
             "runtime_image": "quay.io/rh-ee-psamouel/edb/custom-elyra-image"
           },
           "pipeline_parameters": [],
