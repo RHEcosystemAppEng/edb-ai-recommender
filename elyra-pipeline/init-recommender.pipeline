@@ -641,7 +641,106 @@
       ],
       "app_data": {
         "ui_data": {
-          "comments": []
+          "comments": [
+            {
+              "id": "df18dc95-6129-4ffd-a5ff-dc346e3afdf1",
+              "x_pos": 30,
+              "y_pos": 50,
+              "width": 175,
+              "height": 86,
+              "content": "Create EDB AI extensions and schema objects for EDB's recommender application.",
+              "associated_id_refs": [
+                {
+                  "id": "d814884d-b633-4531-98a2-1fd1b0e254d7",
+                  "node_ref": "723bffd0-e74b-4cf3-9a08-f9295d841c63"
+                }
+              ]
+            },
+            {
+              "id": "c84c417a-00d4-48d1-922c-639bdef60d37",
+              "x_pos": 407,
+              "y_pos": 58,
+              "width": 175,
+              "height": 44,
+              "content": "Populate product catalog.",
+              "associated_id_refs": [
+                {
+                  "id": "e8a08b3e-c45e-4d3a-825d-6e9f529e477d",
+                  "node_ref": "b6f767a9-03ff-4c60-b979-c1259c4bb23b"
+                }
+              ]
+            },
+            {
+              "id": "27308ba1-184e-4f8f-ace6-ea157076ab88",
+              "x_pos": 416,
+              "y_pos": 521,
+              "width": 175,
+              "height": 58,
+              "content": "Upload product images to in-cluster MinIO bucket.",
+              "associated_id_refs": [
+                {
+                  "id": "067bede1-3e07-4449-80a4-e633dbda6139",
+                  "node_ref": "26a86d6a-3211-439a-b0c9-99455199ad6c"
+                }
+              ]
+            },
+            {
+              "id": "d5bb32e1-a675-4a48-a908-ead1485e349b",
+              "x_pos": 682,
+              "y_pos": 96,
+              "width": 175,
+              "height": 86,
+              "content": "Create EDB AI retrievers for product descriptions and images to enable semantic search.",
+              "associated_id_refs": [
+                {
+                  "id": "2ade72fe-230e-4167-a23c-9b35030d6a6f",
+                  "node_ref": "d4cd69b3-fca9-4764-9eca-7d8a74c8f76c"
+                }
+              ]
+            },
+            {
+              "id": "5cc138cc-1b5d-4417-963b-0bedd1e0d946",
+              "x_pos": 931,
+              "y_pos": 84,
+              "width": 175,
+              "height": 58,
+              "content": "Compute text embeddings for baseline data.",
+              "associated_id_refs": [
+                {
+                  "id": "f51b84d4-2a71-49e2-9491-56dd240ee358",
+                  "node_ref": "9d35abce-0703-4e38-bbb0-8d9e691c152a"
+                }
+              ]
+            },
+            {
+              "id": "63db9a0a-fd28-490b-a1e2-48094aecfb51",
+              "x_pos": 920,
+              "y_pos": 499,
+              "width": 175,
+              "height": 58,
+              "content": "Resize images to fit vision model's context length.",
+              "associated_id_refs": [
+                {
+                  "id": "c85e9ab3-a88b-49ec-b09f-4e904add995d",
+                  "node_ref": "be127cce-2a64-4a8f-91a9-eaae9ee7c5a2"
+                }
+              ]
+            },
+            {
+              "id": "3269a7eb-3487-4df9-8551-60bfb49b48b3",
+              "x_pos": 1135,
+              "y_pos": 145,
+              "width": 175,
+              "height": 58,
+              "content": "Compute image embeddings for baseline data.",
+              "associated_id_refs": [
+                {
+                  "id": "afddd0e4-0311-48b7-b4ab-72150c75d6e3",
+                  "node_ref": "2bc6ae35-114b-4f28-8eb1-aa772746a7f6"
+                }
+              ]
+            }
+          ]
         },
         "version": 8,
         "runtime_type": "KUBEFLOW_PIPELINES",
