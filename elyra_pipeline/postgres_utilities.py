@@ -37,8 +37,20 @@ def execute_sql_results(conn:psycopg2.extensions.connection, sql:str) -> list[tu
     rows = cur.fetchall()
     return rows
 
+def execute_sql_results_np(conn:psycopg2.extensions.connection, sql:str) -> list[tuple]:
+    cur = conn.cursor()
+    cur.execute(sql)
+    rows = cur.fetchall()
+    return rows
+
 def execute_sql_results_params(conn:psycopg2.extensions.connection, sql:str, *params) -> list[tuple]:
     cur = conn.cursor()
     cur.execute(sql, params, prepare=True)
+    rows = cur.fetchall()
+    return rows
+
+def execute_sql_results_params_np(conn:psycopg2.extensions.connection, sql:str, *params) -> list[tuple]:
+    cur = conn.cursor()
+    cur.execute(sql, params)
     rows = cur.fetchall()
     return rows

@@ -284,6 +284,14 @@
                 {
                   "env_var": "S3_RECOMMENDER_IMAGES_PATH",
                   "value": "recommender_images"
+                },
+                {
+                  "env_var": "TEXT_EMBEDDING_ENDPOINT",
+                  "value": "https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
+                },
+                {
+                  "env_var": "TEXT_EMBEDDING_MODEL_NAME",
+                  "value": "gritlm-7b"
                 }
               ],
               "kubernetes_pod_annotations": [],
@@ -298,7 +306,7 @@
             "ui_data": {
               "label": "create_retrievers.ipynb",
               "image": "/notebook/samouelian-edb-ai/edb-aidb-workbench/static/elyra/notebook.svg",
-              "x_pos": 691,
+              "x_pos": 690,
               "y_pos": 305,
               "description": "Run notebook file"
             }
