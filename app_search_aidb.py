@@ -211,16 +211,17 @@ def search_catalog(text_query, selected_gender=None):
             st.write(f"Number of elements retrieved: {len(keys)}")
             for img_id in keys:
                 product = get_product_details_in_category(img_id)
-                if product:
+                if product["image_path"]:
                     col_img, col_button = st.columns([3, 1])
                     with col_img:
                         st.write(f"**{product['name']}**")
                         # uncomment the below two lines to display the image from local dataset folder
                         # image = Image.open(product["image_path"])
                         # st.image(image, width=150)
-                        # display image from S3
-                        result = img_id + ".jpg" # Image name should include the extension
-                        display_image_s3(result)
+                        
+                        # Display the image if the path is not None or empty
+                        image_name = os.path.basename(product["image_path"])
+                        display_image_s3(image_name)
                     with col_button:
                         st.link_button("Review", f"/review_page/?review_item_id={img_id}")
         else:
@@ -348,7 +349,7 @@ with right_column:
                         for result in keys:
                             img_id = result.split(".")[0]
                             product = get_product_details_in_category(img_id)
-                            if product:
+                            if product["image_path"]:
                                 col_img, col_button = st.columns([3, 1])
                                 with col_img:
                                     image_name = os.path.basename(product["image_path"])
