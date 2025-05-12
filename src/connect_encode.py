@@ -222,13 +222,15 @@ def create_and_refresh_retriever(conn):
         start_time = time.time()
         # Run retriever for products table
         # The idea is to create a retriever for the products table so the text search can run over it.
-        cur.execute("""SELECT aidb.create_model('paraphrase', 
-                            'bert_local', 
-                            '{"model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
-                             "revision": "main"}'::JSONB);""")
+        cur.execute("""SELECT aidb.create_model('product_descriptions_embeddings', 
+                            'embeddings', 
+                            '{{"model": "gritlm-7b", 
+                            "url": "https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/embeddings", "dimensions":4096}}'::JSONB), 
+                            '{{"api_key":""}}'::JSONB, true);""")
+        
         cur.execute("""SELECT aidb.create_retriever_for_table(
                     name => 'recommend_products',
-                    model_name => 'paraphrase',
+                    model_name => 'product_descriptions_embeddings',
                     source_table => 'products',
                     source_key_column => 'img_id',
                     source_data_column => 'productdisplayname',
@@ -240,7 +242,7 @@ def create_and_refresh_retriever(conn):
         # So please replace the url with the OpenShift vLLM endpoint
         # This is the GenAI model that will be used to generate review summary
         cur.execute(
-            f"""select aidb.create_model('llama38b', 'completions', '{{"model":"llama3", "url":"http://host.docker.internal:11434/v1/chat/completions"}}'::JSONB);"""
+            f"""select aidb.create_model('product_review_model', 'completions', '{{"model":"llama-31-8b-instruct", "url":"https://llama-31-8b-instruct-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/chat/completions"}}'::JSONB);"""
         )
         vector_time = time.time() - start_time
         print(f"Creating and refreshing recom_products retriever took {vector_time:.4f} seconds.")

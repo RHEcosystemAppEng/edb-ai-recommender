@@ -46,8 +46,8 @@ def get_summary_and_labels(_engine, review_string):
     """Generates summary and labels using AIDB via SQL"""
     summary_text = None
     final_labels = []
-    ### WARNING: model_name is hardcoded to "llama38b" for now ###
-    model_name="llama38b" # Model name for the AIDB
+    ### WARNING: model_name is hardcoded to "product_review_model" for now ###
+    model_name="product_review_model" # Model name for the AIDB
     if not review_string:
         st.info("No reviews available to generate summary and labels.")
         return summary_text, final_labels # Return None, empty list
