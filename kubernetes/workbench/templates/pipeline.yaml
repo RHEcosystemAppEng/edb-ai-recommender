@@ -1,0 +1,44 @@
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1
+kind: DataSciencePipelinesApplication
+metadata:
+  finalizers:
+    - datasciencepipelinesapplications.opendatahub.io/finalizer
+  name: edb-datascience-pipeline
+  namespace: {{ .Release.Namespace }}
+spec:
+  apiServer:
+    artifactSignedURLExpirySeconds: 60
+    caBundleFileMountPath: ''
+    caBundleFileName: ''
+    deploy: true
+    enableOauth: true
+    enableSamplePipeline: false
+  database:
+    disableHealthCheck: false
+    mariaDB:
+      deploy: true
+      pipelineDBName: mlpipeline
+      pvcSize: 10Gi
+      username: mlpipeline
+  dspVersion: v2
+  objectStorage:
+    disableHealthCheck: false
+    enableExternalRoute: false
+    externalStorage:
+      basePath: ''
+      bucket: {{.Values.bucketName}}
+      host: {{.Values.s3StorageHost}} 
+      port: ''
+      region: {{.Values.s3StorageRegion}}
+      s3CredentialsSecret:
+        accessKey: AWS_ACCESS_KEY_ID
+        secretKey: AWS_SECRET_ACCESS_KEY
+        secretName: dashboard-dspa-secret
+      scheme: https
+  persistenceAgent:
+    deploy: true
+    numWorkers: 2
+  podToPodTLS: true
+  scheduledWorkflow:
+    cronScheduleTimezone: UTC
+    deploy: true

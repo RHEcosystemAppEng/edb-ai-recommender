@@ -1,0 +1,47 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    openshift.io/display-name: GritLM-7B
+    serving.knative.openshift.io/enablePassthrough: 'true'
+    sidecar.istio.io/inject: 'true'
+    sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+  name: gritlm-7b
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - inferenceservice.finalizers
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  predictor:
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      args:
+        - '--max-model-len=8096'
+        - '--task=embed'
+        - '--trust_remote_code'
+      modelFormat:
+        name: vLLM
+      name: ''
+      resources:
+        limits:
+          cpu: '8'
+          memory: 10Gi
+          nvidia.com/gpu: '1'
+        requests:
+          cpu: '4'
+          memory: 8Gi
+          nvidia.com/gpu: '1'
+      runtime: gritlm-7b
+      storage:
+        key: secret-s3-bucket
+        path: GritLM-7B
+    tolerations:
+      - effect: NoSchedule
+        key: nvidia.com/gpu
+        operator: Exists
+      - effect: NoSchedule
+        key: odh-notebook
+        operator: Exists
+  url: 'https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com'

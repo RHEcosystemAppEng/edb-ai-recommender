@@ -1,0 +1,19 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  annotations:
+    openshift.io/description: ''
+    openshift.io/display-name: persistent-volume-claim-notebook
+  name: persistent-volume-claim-notebook
+  namespace: {{ .Release.Namespace }}
+  finalizers:
+    - kubernetes.io/pvc-protection
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 200Gi
+  volumeMode: Filesystem

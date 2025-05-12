@@ -1,0 +1,7 @@
+baseClusterURL: https://console-openshift-console.apps.cluster-28rt7.28rt7.sandbox3157.opentlc.com
+bucketName: edb-aidb
+s3StorageRegion: us-east-1
+s3StorageHost: minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com
+
+notebook:
+  repo: "https://github.com/RHEcosystemAppEng/edb-ai-recommender.git"

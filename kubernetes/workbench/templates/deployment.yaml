@@ -1,0 +1,208 @@
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: 'true'
+    opendatahub.io/image-display-name: Standard Data Science
+    notebooks.opendatahub.io/oauth-logout-url: '{{.Values.baseClusterURL}}/projects/{{ .Release.Namespace }}?notebookLogout=notebook-edb-ai'
+    opendatahub.io/accelerator-name: migrated-gpu
+    openshift.io/description: ''
+    openshift.io/display-name: notebook-edb-ai
+    notebooks.opendatahub.io/last-image-selection: 's2i-generic-data-science-notebook:2024.2'
+    notebooks.opendatahub.io/last-size-selection: Medium
+  name: notebook-edb-ai
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: notebook-edb-ai
+    opendatahub.io/dashboard: 'true'
+    opendatahub.io/odh-managed: 'true'
+spec:
+  template:
+    spec:
+      affinity: {}
+      initContainers:
+        - name: clone-notebook-repo
+          image: alpine/git
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo "Cleaning /opt/app-root/src..." && \
+              rm -rf /opt/app-root/src/* && \
+              echo "Cloning repo..." && \
+              git clone {{ .Values.notebook.repo }} /tmp/notebook && \
+              cp -r /tmp/notebook/* /opt/app-root/src && \
+              rm -rf /tmp/notebook
+          volumeMounts:
+            - name: notebook-edb-ai
+              mountPath: /opt/app-root/src
+      containers:
+        - resources:
+            limits:
+              cpu: '6'
+              memory: 24Gi
+              nvidia.com/gpu: '1'
+            requests:
+              cpu: '3'
+              memory: 24Gi
+              nvidia.com/gpu: '1'
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/{{ .Release.Namespace }}/notebook-edb-ai/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: notebook-edb-ai
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/{{ .Release.Namespace }}/notebook-edb-ai/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NOTEBOOK_ARGS
+              value: |-
+                --ServerApp.port=8888
+                                  --ServerApp.token=''
+                                  --ServerApp.password=''
+                                  --ServerApp.base_url=/notebook/{{ .Release.Namespace }}/notebook-edb-ai
+                                  --ServerApp.quit_button=False
+                                  --ServerApp.tornado_settings={"user":"","hub_host":"{{.Values.baseClusterURL}}","hub_prefix":"/projects/{{ .Release.Namespace }}"}
+            - name: JUPYTER_IMAGE
+              value: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.2'
+            - name: PIP_CERT
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: SSL_CERT_FILE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: PIPELINES_SSL_SA_CERTS
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: GIT_SSL_CAINFO
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+          ports:
+            - containerPort: 8888
+              name: notebook-port
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /opt/app-root/src
+              name: notebook-edb-ai
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /etc/pki/tls/custom-certs/ca-bundle.crt
+              name: trusted-ca
+              readOnly: true
+              subPath: ca-bundle.crt
+            - mountPath: /opt/app-root/runtimes
+              name: elyra-dsp-details
+          envFrom:
+            - secretRef:
+                name: secret-edb-aidb
+            - secretRef:
+                name: secret-s3-bucket
+            - secretRef:
+                name: secret-text-embedding-endpoint
+          image: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-generic-data-science-notebook:2024.2'
+          workingDir: /opt/app-root/src
+        - resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: oauth-proxy
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 8443
+              name: oauth-proxy
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/oauth/config
+              name: oauth-config
+            - mountPath: /etc/tls/private
+              name: tls-certificates
+          image: 'registry.redhat.io/openshift4/ose-oauth-proxy@sha256:4f8d66597feeb32bb18699326029f9a71a5aca4a57679d636b876377c2e95695'
+          args:
+            - '--provider=openshift'
+            - '--https-address=:8443'
+            - '--http-address='
+            - '--openshift-service-account=notebook-edb-ai'
+            - '--cookie-secret-file=/etc/oauth/config/cookie_secret'
+            - '--cookie-expire=24h0m0s'
+            - '--tls-cert=/etc/tls/private/tls.crt'
+            - '--tls-key=/etc/tls/private/tls.key'
+            - '--upstream=http://localhost:8888'
+            - '--upstream-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+            - '--email-domain=*'
+            - '--skip-provider-button'
+            - '--openshift-sar={"verb":"get","resource":"notebooks","resourceAPIGroup":"kubeflow.org","resourceName":"notebook-edb-ai","namespace":"$(NAMESPACE)"}'
+            - '--logout-url=https://rhods-dashboard-redhat-ods-applications.apps.ai-dev01.kni.syseng.devcluster.openshift.com/projects/{{.Values.applicationName }}?notebookLogout=notebook-edb-ai'
+      enableServiceLinks: false
+      serviceAccountName: service-account-notebook
+      tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Exists
+        - effect: NoSchedule
+          key: odh-notebook
+          operator: Exists
+      volumes:
+        - name: notebook-edb-ai
+          persistentVolumeClaim:
+            claimName: persistent-volume-claim-notebook
+        - emptyDir:
+            medium: Memory
+          name: shm
+        - configMap:
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+            name: workbench-trusted-ca-bundle
+            optional: true
+          name: trusted-ca
+        - name: oauth-config
+          secret:
+            defaultMode: 420
+            secretName: notebook-edb-ai-oauth-config
+        - name: tls-certificates
+          secret:
+            defaultMode: 420
+            secretName: notebook-edb-ai-tls
+        - name: elyra-dsp-details
+          secret:
+            secretName: ds-pipeline-config
