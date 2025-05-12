@@ -70,15 +70,6 @@ st.markdown("## Powered by OpenShift AI, EDB Postgres and AIDB")
 db_url = get_db_connection_string()
 engine = create_engine(db_url)
 
-# def load_data_to_db(conn, file_path):
-#     """Load data from CSV file to the database."""
-#     with open(file_path, 'r') as f:
-#         next(f)  # Skip the header row
-#         with conn.cursor() as cur:
-#             cur.copy_expert("COPY products FROM STDIN WITH CSV HEADER", f)
-#     f.close()
-#     conn.commit()
-
 @st.cache_data
 def get_categories():
     query = text("SELECT DISTINCT masterCategory FROM products order by 1;")
@@ -218,15 +209,21 @@ def search_catalog(text_query, selected_gender=None):
         st.write(f"Querying similar catalog took {query_time:.4f} seconds.")
         if keys:
             st.write(f"Number of elements retrieved: {len(keys)}")
-            for result in keys:
-                product = get_product_details_in_category(result)
-                st.write(f"**{product['name']}**")
-                # uncomment the below two lines to display the image from local dataset folder
-                # image = Image.open(product["image_path"])
-                # st.image(image, width=150)
-                # display image from S3
-                result = result + ".jpg" # Image name should include the extension
-                display_image_s3(result)
+            for img_id in keys:
+                product = get_product_details_in_category(img_id)
+                if product["image_path"]:
+                    col_img, col_button = st.columns([3, 1])
+                    with col_img:
+                        st.write(f"**{product['name']}**")
+                        # uncomment the below two lines to display the image from local dataset folder
+                        # image = Image.open(product["image_path"])
+                        # st.image(image, width=150)
+                        
+                        # Display the image if the path is not None or empty
+                        image_name = os.path.basename(product["image_path"])
+                        display_image_s3(image_name)
+                    with col_button:
+                        st.link_button("Review", f"/review_page/?review_item_id={img_id}")
         else:
             st.error("No results found.")
 
@@ -352,14 +349,22 @@ with right_column:
                         for result in keys:
                             img_id = result.split(".")[0]
                             product = get_product_details_in_category(img_id)
-                            st.write(f"**{product['name']}**")
-                            # uncomment the below two lines to display the image from local dataset folder
-                            # image = Image.open(product["image_path"])
-                            # st.image(image, width=150)
-                            # display image from S3
-                            display_image_s3(result)
+                            if product["image_path"]:
+                                col_img, col_button = st.columns([3, 1])
+                                with col_img:
+                                    image_name = os.path.basename(product["image_path"])
+                                    display_image_s3(image_name)
+                                    # st.write(f"**{product['name']}**")
+                                    # uncomment the below two lines to display the image from local dataset folder
+                                    # image = Image.open(product["image_path"])
+                                    # st.image(image, width=150)
+                                    # display image from S3
+                                    # result = img_id + ".jpg" # Image name should include the extension
+                                    # display_image_s3(result)
+                                with col_button:
+                                    st.link_button("Review", f"/review_page/?review_item_id={img_id}")
                     else:
-                        st.write("No similar items found.")
+                        st.write("No results found.")
             except Exception as e:
                 st.error(f"An error occurred: {e}")
             finally:

@@ -6,3 +6,4 @@ psycopg2-binary
 SQLAlchemy
 pandas 
 boto3
+streamlit-antd-components
