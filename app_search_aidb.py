@@ -92,7 +92,7 @@ def get_genders():
 @st.cache_data
 def get_products_by_category(category):
     query = text(
-        "SELECT productDisplayName, img_id FROM products WHERE masterCategory = :category order by 1 limit 30;"
+        "SELECT productDisplayName, product_id FROM products WHERE masterCategory = :category order by 1 limit 30;"
     )
     with engine.connect() as connection:
         result = connection.execute(query, {"category": category})
@@ -100,7 +100,7 @@ def get_products_by_category(category):
         products = [
             {
                 "name": row["productdisplayname"],
-                "image_path": f'dataset/images/{row["img_id"]}.jpg',
+                "image_path": f'dataset/images/{row["product_id"]}.jpg',
             }
             for row in result.mappings().all()
         ]
@@ -108,30 +108,30 @@ def get_products_by_category(category):
 
 
 @st.cache_data
-def get_product_details_in_category(img_id):
+def get_product_details_in_category(product_id):
     """
     Fetch product details for a given category by image ID.
 
     Args:
-        img_id (str): The image ID to search for in the database.
+        product_id (str): The image ID to search for in the database.
 
     Returns:
         dict: A dictionary containing product name and image path.
     """
 
     query = text(
-        "SELECT productDisplayName, img_id FROM products WHERE img_id = :img_id;"
+        "SELECT productDisplayName, product_id FROM products WHERE product_id = :product_id;"
     )
 
     with engine.connect() as connection:
-        result = connection.execute(query, {"img_id": img_id})
+        result = connection.execute(query, {"product_id": product_id})
         # Convert  result to a list of dictionaries
         product = result.mappings().first()
 
         if product:
             product_details = {
                 "name": product["productdisplayname"],
-                "image_path": f'dataset/images/{product["img_id"]}.jpg',
+                "image_path": f'dataset/images/{product["product_id"]}.jpg',
             }
         else:
             product_details = None
@@ -185,7 +185,7 @@ def search_catalog(text_query, selected_gender=None):
             cur.execute(
             f"""WITH filtered_products AS (
             -- First get all men's products
-            SELECT img_id, productdisplayname
+            SELECT product_id, productdisplayname
             FROM products 
             WHERE gender = '{selected_gender}'
         )
@@ -194,7 +194,7 @@ def search_catalog(text_query, selected_gender=None):
             result.distance as score
         FROM filtered_products fp
         CROSS JOIN LATERAL aidb.retrieve_text('{st.session_state.text_retriever_name}', '{text_query}', 40) AS result
-        WHERE result.key = fp.img_id
+        WHERE result.key = fp.product_id
         ORDER BY score ASC LIMIT 5;"""
         )
         else:
@@ -209,8 +209,8 @@ def search_catalog(text_query, selected_gender=None):
         st.write(f"Querying similar catalog took {query_time:.4f} seconds.")
         if keys:
             st.write(f"Number of elements retrieved: {len(keys)}")
-            for img_id in keys:
-                product = get_product_details_in_category(img_id)
+            for product_id in keys:
+                product = get_product_details_in_category(product_id)
                 if product["image_path"]:
                     col_img, col_button = st.columns([3, 1])
                     with col_img:
@@ -223,7 +223,7 @@ def search_catalog(text_query, selected_gender=None):
                         image_name = os.path.basename(product["image_path"])
                         display_image_s3(image_name)
                     with col_button:
-                        st.link_button("Review", f"/review_page/?review_item_id={img_id}")
+                        st.link_button("Review", f"/review_page/?review_item_id={product_id}")
         else:
             st.error("No results found.")
 
@@ -322,7 +322,7 @@ with right_column:
                         cur.execute(
                         f"""WITH filtered_products AS (
                         -- First get all men's products
-                        SELECT img_id, productdisplayname
+                        SELECT product_id, productdisplayname
                         FROM products 
                         WHERE gender = '{selected_gender}'
                     )
@@ -331,7 +331,7 @@ with right_column:
                         result.distance as score
                     FROM filtered_products fp
                     CROSS JOIN LATERAL aidb.retrieve_key('{st.session_state.img_retriever_name}', decode('{encoded_data}', 'base64'), 40) AS result
-                    WHERE result.key = CONCAT(fp.img_id, '.jpg')
+                    WHERE result.key = CONCAT(fp.product_id, '.jpg')
                     ORDER BY score ASC LIMIT 5;"""
                     )
                     else:
@@ -347,8 +347,8 @@ with right_column:
                     if keys:
                         st.write(f"Found {len(keys)} similar items.")
                         for result in keys:
-                            img_id = result.split(".")[0]
-                            product = get_product_details_in_category(img_id)
+                            product_id = result.split(".")[0]
+                            product = get_product_details_in_category(product_id)
                             if product["image_path"]:
                                 col_img, col_button = st.columns([3, 1])
                                 with col_img:
@@ -359,10 +359,10 @@ with right_column:
                                     # image = Image.open(product["image_path"])
                                     # st.image(image, width=150)
                                     # display image from S3
-                                    # result = img_id + ".jpg" # Image name should include the extension
+                                    # result = product_id + ".jpg" # Image name should include the extension
                                     # display_image_s3(result)
                                 with col_button:
-                                    st.link_button("Review", f"/review_page/?review_item_id={img_id}")
+                                    st.link_button("Review", f"/review_page/?review_item_id={product_id}")
                     else:
                         st.write("No results found.")
             except Exception as e:

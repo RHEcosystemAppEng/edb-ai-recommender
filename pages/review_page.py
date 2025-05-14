@@ -132,19 +132,19 @@ def display_image_s3(image_name):
     st.image(image, caption=image_name, width=150)
 
 @st.cache_data
-def get_product_details_by_id(img_id):
+def get_product_details_by_id(product_id):
     """ Fetch product details for a given image ID. """
-    query = text("SELECT productDisplayName, img_id FROM products WHERE img_id = :img_id;")
+    query = text("SELECT productDisplayName, product_id FROM products WHERE product_id = :product_id;")
     # Use the globally defined engine
     try:
         with engine.connect() as connection:
-            result = connection.execute(query, {"img_id": img_id})
+            result = connection.execute(query, {"product_id": product_id})
             product = result.mappings().first()
             if product:
                 return {
                     "name": product["productdisplayname"],
-                    "img_id": product["img_id"],
-                    "image_path": f'dataset/images/{product["img_id"]}.jpg',
+                    "product_id": product["product_id"],
+                    "image_path": f'dataset/images/{product["product_id"]}.jpg',
                 }
             else:
                 return None
