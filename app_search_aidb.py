@@ -22,6 +22,10 @@ logging.basicConfig(
     ]
 )
 
+logger = logging.getLogger(__name__)
+
+logger.info("Logger successfully setup.")
+
 # Custom Header Section
 logo_path = "src/edb_new.png"
 primary_color = "#FF4B33"
@@ -100,7 +104,8 @@ def get_products_by_category(category):
         products = [
             {
                 "name": row["productdisplayname"],
-                "image_path": f'dataset/images/{row["product_id"]}.jpg',
+                #"image_path": f'dataset/images/{row["product_id"]}.jpg',
+                "image_path": f'{row["product_id"]}.jpg',
             }
             for row in result.mappings().all()
         ]
@@ -156,7 +161,10 @@ def display_image_s3(image_name):
     edb_bucket = s3_resource.Bucket(s3_profile.bucket_name)
 
     object_key = os.path.join(s3_profile.recommender_images_path, image_name)
-    print(f"Object key is: {object_key}")
+
+    logger.info(f"Bucket name: {s3_profile.bucket_name}")
+    logger.info(f"Object key: {object_key}")
+
     obj = edb_bucket.Object(object_key)
 
     response = obj.get()
