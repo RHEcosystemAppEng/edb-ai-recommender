@@ -131,7 +131,8 @@ def get_product_details_in_category(product_id):
         if product:
             product_details = {
                 "name": product["productdisplayname"],
-                "image_path": f'dataset/images/{product["product_id"]}.jpg',
+                #"image_path": f'dataset/images/{product["product_id"]}.jpg',
+                "image_path": f'{product["product_id"]}.jpg',
             }
         else:
             product_details = None
@@ -155,6 +156,7 @@ def display_image_s3(image_name):
     edb_bucket = s3_resource.Bucket(s3_profile.bucket_name)
 
     object_key = os.path.join(s3_profile.recommender_images_path, image_name)
+    print(f"Object key is: {object_key}")
     obj = edb_bucket.Object(object_key)
 
     response = obj.get()
