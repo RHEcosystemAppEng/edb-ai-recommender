@@ -269,9 +269,10 @@ if review_item_id:
 
 else: # No item selected
     st.warning("No product selected for review.")
-    st.info("Please go back to the search page and click 'Review' on an item.")
-    if st.button("Go to Search Page"):
-        if hasattr(st, "switch_page"):
-            st.switch_page("app.py") # Navigate back to main app
-        else:
-            st.info("Navigate back using the sidebar.")
+    st.info("Please navigate back to the search page using the sidebar and click 'Review' on an item in a search result.")
+    #Did not work (bad link? ... just comment out for now)
+    #if st.button("Go to Search Page"):
+        #if hasattr(st, "switch_page"):
+        #    st.switch_page("app.py") # Navigate back to main app
+        #else:
+        #    st.info("Navigate back using the sidebar.")
