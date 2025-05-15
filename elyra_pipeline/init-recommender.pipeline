@@ -79,7 +79,8 @@
             "component_parameters": {
               "dependencies": [
                 "postgres_utilities.py",
-                "products.csv"
+                "products.csv",
+                "product_reviews.csv"
               ],
               "include_subdirectories": false,
               "outputs": [],
@@ -759,13 +760,13 @@
           "name": "init-recommender",
           "runtime": "Data Science Pipelines",
           "pipeline_defaults": {
+            "kubernetes_shared_mem_size": {
+              "size": 7
+            },
             "kubernetes_pod_labels": [],
             "mounted_volumes": [],
             "kubernetes_tolerations": [],
             "kubernetes_pod_annotations": [],
-            "kubernetes_shared_mem_size": {
-              "size": 7
-            },
             "kubernetes_secrets": [],
             "env_vars": [],
             "runtime_image": "quay.io/rh-ee-psamouel/edb/custom-elyra-image"
