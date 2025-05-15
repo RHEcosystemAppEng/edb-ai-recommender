@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 
 USER appuser
 WORKDIR /home/appuser
+ENV HOME=/home/appuser
 
 RUN git clone https://github.com/RHEcosystemAppEng/edb-ai-recommender.git app
 
