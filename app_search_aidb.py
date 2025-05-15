@@ -14,6 +14,8 @@ from src.db_connection import create_db_connection, get_db_connection_string
 from src.s3_connection import get_s3_connection_profile
 import logging
 
+os.environ["STREAMLIT_HOME"] = "/home/appuser/.streamlit"
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -162,8 +164,8 @@ def display_image_s3(image_name):
 
     object_key = os.path.join(s3_profile.recommender_images_path, image_name)
 
-    logger.info(f"Bucket name: {s3_profile.bucket_name}")
-    logger.info(f"Object key: {object_key}")
+    #logger.info(f"Bucket name: {s3_profile.bucket_name}")
+    #logger.info(f"Object key: {object_key}")
 
     obj = edb_bucket.Object(object_key)
 
