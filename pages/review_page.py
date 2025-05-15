@@ -2,7 +2,7 @@
 import streamlit as st
 import os
 import io
-import boto3
+import boto3, botocore
 import pandas as pd 
 import re         
 from PIL import Image
@@ -106,7 +106,7 @@ def get_summary_and_labels(_engine, review_string):
     return summary_text, final_labels
 
 
-def display_image_s3(image_name):
+def display_image_s3(image_nam, width=150):
 
     s3_profile = get_s3_connection_profile()
 
@@ -129,22 +129,22 @@ def display_image_s3(image_name):
     response = obj.get()
     image_data = response['Body'].read()
     image = Image.open(io.BytesIO(image_data))
-    st.image(image, caption=image_name, width=150)
+    st.image(image, caption=image_name, width=width)
 
 @st.cache_data
-def get_product_details_by_id(img_id):
+def get_product_details_by_id(product_id):
     """ Fetch product details for a given image ID. """
-    query = text("SELECT productDisplayName, img_id FROM products WHERE img_id = :img_id;")
+    query = text("SELECT productDisplayName, product_id FROM products WHERE product_id = :product_id;")
     # Use the globally defined engine
     try:
         with engine.connect() as connection:
-            result = connection.execute(query, {"img_id": img_id})
+            result = connection.execute(query, {"product_id": product_id})
             product = result.mappings().first()
             if product:
                 return {
                     "name": product["productdisplayname"],
-                    "img_id": product["img_id"],
-                    "image_path": f'dataset/images/{product["img_id"]}.jpg',
+                    "product_id": product["product_id"],
+                    "image_path": f'dataset/images/{product["product_id"]}.jpg',
                 }
             else:
                 return None

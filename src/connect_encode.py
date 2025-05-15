@@ -36,7 +36,7 @@ def _create_tables(cur):
     # Create products table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS products (
-            img_id TEXT,
+            product_id TEXT,
             gender VARCHAR(50),
             masterCategory VARCHAR(100),
             subCategory VARCHAR(100),
@@ -232,7 +232,7 @@ def create_and_refresh_retriever(conn):
                     name => 'recommend_products',
                     model_name => 'product_descriptions_embeddings',
                     source_table => 'products',
-                    source_key_column => 'img_id',
+                    source_key_column => 'product_id',
                     source_data_column => 'productdisplayname',
                     source_data_type => 'Text'
                     );""")
