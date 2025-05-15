@@ -10,7 +10,7 @@ RUN pip3 install --no-cache-dir --upgrade \
 RUN apt-get update && apt-get install -y \
     build-essential \
     software-properties-common \
-    git \
+    git
 
 RUN mkdir -p /home/appuser/.streamlit \
     && chmod -R 777 /home/appuser/.streamlit
