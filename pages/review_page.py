@@ -106,7 +106,7 @@ def get_summary_and_labels(_engine, review_string):
     return summary_text, final_labels
 
 
-def display_image_s3(image_name):
+def display_image_s3(image_nam, width=150):
 
     s3_profile = get_s3_connection_profile()
 
@@ -129,7 +129,7 @@ def display_image_s3(image_name):
     response = obj.get()
     image_data = response['Body'].read()
     image = Image.open(io.BytesIO(image_data))
-    st.image(image, caption=image_name, width=150)
+    st.image(image, caption=image_name, width=width)
 
 @st.cache_data
 def get_product_details_by_id(product_id):
