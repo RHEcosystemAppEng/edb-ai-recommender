@@ -2,7 +2,7 @@
 import streamlit as st
 import os
 import io
-import boto3
+import boto3, botocore
 import pandas as pd 
 import re         
 from PIL import Image
