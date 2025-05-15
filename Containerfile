@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     git \
     mkdir /home/appuser/.streamlit \
-    chmod -R 777 /home/appuser/.streamlit
+    chmod 777 /home/appuser/.streamlit
 
 
 USER appuser
