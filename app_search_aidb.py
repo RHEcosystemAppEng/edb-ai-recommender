@@ -323,7 +323,7 @@ with right_column:
                 encoded_data = base64.b64encode(bytes_data).decode('utf-8')
                 image = Image.open(io.BytesIO(bytes_data))
                 
-                st.image(image, caption="Uploaded Image", use_column_width=True)
+                st.image(image, caption="Uploaded Image", use_container_width=True)
                 # Generate embeddings for the uploaded image and search
                 start_time = time.time()
                 conn = st.session_state.db_conn
