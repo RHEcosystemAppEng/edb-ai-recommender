@@ -2,7 +2,7 @@ import psycopg2, os
 
 def connect_db(uri:str=None) -> psycopg2.extensions.connection:
     if not uri:
-        uri = os.environ.get('URI')
+        uri = os.environ.get('POSTGRES_URI')
     if not uri:
         missing_connection_uri = """
             A connection string URI was not provided and none was found in the local environment configuration.
