@@ -35,7 +35,7 @@ spec:
           nvidia.com/gpu: '1'
       runtime: gritlm-7b
       storage:
-        key: secret-s3-bucket
+        key: inference-secrets
         path: GritLM-7B
     tolerations:
       - effect: NoSchedule
