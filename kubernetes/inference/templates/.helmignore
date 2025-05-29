@@ -1,0 +1,4 @@
+secrets-map.yaml
+secrets.yaml
+text-embedding-inference-service.yaml
+text-embedding-serving-runtime.yaml

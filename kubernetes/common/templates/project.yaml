@@ -1,0 +1,11 @@
+kind: Project
+apiVersion: project.openshift.io/v1
+metadata:
+  name: {{ .Release.Namespace }}
+  labels:
+    kubernetes.io/metadata.name: {{ .Release.Namespace }}
+    modelmesh-enabled: 'true'
+  annotations:
+spec:
+  finalizers:
+    - kubernetes

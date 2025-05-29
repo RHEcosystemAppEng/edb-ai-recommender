@@ -27,50 +27,50 @@ spec:
             - name: S3_ENDPOINT_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.applicationName}}-config-map
-                  key: s3-endpoint-url
+                  name: secret-map
+                  key: AWS_S3_ENDPOINT
             - name: S3_BUCKET_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.applicationName}}-config-map
-                  key: s3-bucket-name
+                  name: secret-map
+                  key: AWS_S3_BUCKET
             - name: S3_REGION
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.applicationName}}-config-map
-                  key: s3-region
+                  name: secret-map
+                  key: AWS_DEFAULT_REGION
             - name: S3_SKIP_SIGNATURE
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.applicationName}}-config-map
-                  key: s3-skip-signature
+                  name: secret-map
+                  key: S3_SKIP_SIGNATURE
             - name: S3_RECOMMENDER_IMAGES_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: {{ .Values.applicationName}}-config-map
-                  key: s3-recommender-images-path
+                  name: secret-map
+                  key: S3_RECOMMENDER_IMAGES_PATH
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: database-user
+                  name: secret-map
+                  key: DATABASE_USER
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: database-password
+                  name: secret-map
+                  key: DATABASE_PASSWORD
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: database-name
+                  name: secret-map
+                  key: DATABASE_NAME
             - name: S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: s3-access-key
+                  name: secret-map
+                  key: AWS_ACCESS_KEY_ID
             - name: S3_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: s3-secret-key
+                  name: secret-map
+                  key: AWS_SECRET_ACCESS_KEY

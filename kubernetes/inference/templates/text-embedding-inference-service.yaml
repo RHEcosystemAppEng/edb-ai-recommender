@@ -35,7 +35,7 @@ spec:
           nvidia.com/gpu: '1'
       runtime: gritlm-7b
       storage:
-        key: inference-secrets
+        key: storage-config
         path: GritLM-7B
     tolerations:
       - effect: NoSchedule
@@ -44,4 +44,3 @@ spec:
       - effect: NoSchedule
         key: odh-notebook
         operator: Exists
-  url: 'https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com'
