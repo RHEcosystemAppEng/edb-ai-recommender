@@ -6,10 +6,8 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: 'true'
     sidecar.istio.io/inject: 'true'
     sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+    serving.kserve.io/deploymentMode: RawDeployment
   name: gritlm-7b
-  namespace: {{ .Release.Namespace }}
-  finalizers:
-    - inferenceservice.finalizers
   labels:
     opendatahub.io/dashboard: 'true'
 spec:
@@ -37,6 +35,8 @@ spec:
       storage:
         key: storage-config
         path: GritLM-7B
+    nodeSelector:
+      nvidia.com/gpu.present: "true"
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu

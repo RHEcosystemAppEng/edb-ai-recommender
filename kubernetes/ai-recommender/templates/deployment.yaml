@@ -4,7 +4,7 @@ metadata:
   annotations:
     deployment.kubernetes.io/revision: '2'
   name: {{.Values.applicationName}}-web-application-deployment
-  namespace: {{.Values.targetNamespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ai-recommender.primary-labels" $ | indent 4 }}
 spec:

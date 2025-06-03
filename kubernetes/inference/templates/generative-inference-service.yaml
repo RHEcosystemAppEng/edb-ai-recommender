@@ -6,10 +6,8 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: 'true'
     sidecar.istio.io/inject: 'true'
     sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+    serving.kserve.io/deploymentMode: RawDeployment
   name: llama-31-8b-instruct
-  namespace: {{.Release.Namespace}}
-  finalizers:
-    - inferenceservice.finalizers
   labels:
     opendatahub.io/dashboard: 'true'
 spec:
@@ -37,6 +35,8 @@ spec:
       storage:
         key: storage-config
         path: Llama-3.1-8B-Instruct
+    nodeSelector:
+      nvidia.com/gpu.present: "true"
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu

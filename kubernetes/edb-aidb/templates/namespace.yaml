@@ -1,7 +1,0 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: {{ .Values.targetNamespace }}
-  labels:
-    name: {{ .Values.targetNamespace }}
-    app: {{ .Values.applicationName }}
