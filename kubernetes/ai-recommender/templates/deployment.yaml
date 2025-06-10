@@ -19,34 +19,34 @@ spec:
     spec:
       containers:
         - name: ai-recommender-web-application
-          image: 'docker.io/psamouelian/ai-recommender:latest'
+          image: 'quay.io/rh-ee-$USER/ai-recommender:latest'
           ports:
             - containerPort: 8501
               protocol: TCP
           env:
             - name: S3_ENDPOINT_URL
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: secret-map
                   key: AWS_S3_ENDPOINT
             - name: S3_BUCKET_NAME
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: secret-map
                   key: AWS_S3_BUCKET
             - name: S3_REGION
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: secret-map
                   key: AWS_DEFAULT_REGION
             - name: S3_SKIP_SIGNATURE
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: secret-map
                   key: S3_SKIP_SIGNATURE
             - name: S3_RECOMMENDER_IMAGES_PATH
               valueFrom:
-                configMapKeyRef:
+                secretKeyRef:
                   name: secret-map
                   key: S3_RECOMMENDER_IMAGES_PATH
             - name: DATABASE_USER
