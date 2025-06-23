@@ -2,6 +2,7 @@ import pandas as pd
 import psycopg2
 import time
 import os
+import json
 import boto3, botocore
 
 from io import StringIO
@@ -34,7 +35,8 @@ def _create_tables(cur):
     cur.execute("DROP TABLE IF EXISTS products;")
     cur.execute("DROP TABLE IF EXISTS product_review;")
     # Create products table
-    cur.execute("""
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS products (
             img_id TEXT,
             gender VARCHAR(50),
@@ -47,7 +49,8 @@ def _create_tables(cur):
             usage TEXT NULL,
             productDisplayName TEXT NULL
         );
-    """)
+    """
+    )
     # Create product_review table
     cur.execute(
         """CREATE TABLE IF NOT EXISTS product_review(
@@ -58,10 +61,9 @@ def _create_tables(cur):
             review TEXT
     );"""
     )
-    
 
-def populate_product_data(conn: psycopg2.extensions.connection, csv_file: str
-) -> None:
+
+def populate_product_data(conn: psycopg2.extensions.connection, csv_file: str) -> None:
     """
     Populate the products table with data from the CSV file.
     Args:
@@ -105,6 +107,7 @@ def populate_product_data(conn: psycopg2.extensions.connection, csv_file: str
     conn.commit()
     print("Finished populating products table")
 
+
 def insert_dataframe(
     df: pd.DataFrame, table_name: str, connection: psycopg2.extensions.connection
 ) -> None:
@@ -137,6 +140,7 @@ def insert_dataframe(
     finally:
         cursor.close()
 
+
 def populate_product_review_data(
     conn: psycopg2.extensions.connection, csv_file: str
 ) -> None:
@@ -160,27 +164,32 @@ def populate_product_review_data(
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
 
+
 def upload_images_to_s3():
-     
+
     s3_profile = get_s3_connection_profile()
 
     local_images_directory = "./dataset/images"
-     
-    session = boto3.session.Session(
-            aws_access_key_id=s3_profile.access_key,
-            aws_secret_access_key=s3_profile.secret_key
-          )
 
-    s3_resource = session.resource('s3',
-        config=botocore.client.Config(signature_version='s3v4'),
+    session = boto3.session.Session(
+        aws_access_key_id=s3_profile.access_key,
+        aws_secret_access_key=s3_profile.secret_key,
+    )
+
+    s3_resource = session.resource(
+        "s3",
+        config=botocore.client.Config(signature_version="s3v4"),
         endpoint_url=s3_profile.endpoint_url,
-        region_name=s3_profile.region
-        )
-     
+        region_name=s3_profile.region,
+    )
+
     edb_bucket = s3_resource.Bucket(s3_profile.bucket_name)
 
     images_uploaded = 0
-    print(f"Uploading images to s3 bucket {s3_profile.endpoint_url}:{s3_profile.bucket_name} ... ", end="")
+    print(
+        f"Uploading images to s3 bucket {s3_profile.endpoint_url}:{s3_profile.bucket_name} ... ",
+        end="",
+    )
 
     for root, dirs, files in os.walk(local_images_directory):
         for filename in files:
@@ -193,11 +202,12 @@ def upload_images_to_s3():
 
     print("Upload completed.")
 
+
 def create_and_refresh_retriever(conn):
     """Create and retriever with bytea image data"""
-    
+
     s3_connection_profile = get_s3_connection_profile()
-    
+
     with conn.cursor() as cur:
         start_time = time.time()
         # Run for S3 bucket
@@ -205,66 +215,110 @@ def create_and_refresh_retriever(conn):
         fdw_drop_sql = "drop server if exists images_s3_little cascade;"
         cur.execute(fdw_drop_sql)
 
-        fdw_create_sql = f"""CREATE SERVER images_s3_little FOREIGN DATA WRAPPER pgfs_fdw OPTIONS (url '{s3_connection_profile.bucket_name}', region '{s3_connection_profile.region}', skip_signature '{s3_connection_profile.skip_signature}');"""
+        # Safer with json.dumps
+        options = json.dumps(
+            {"region": s3_connection_profile.region, "skip_signature": "true"}
+        )
+        fdw_create_sql = f"""SELECT pgfs.create_storage_location('images_s3_little', '{s3_connection_profile.bucket_name}', options => '{options}');"""
         cur.execute(fdw_create_sql)
-        cur.execute("""SELECT aidb.create_volume('images_bucket_vol', 'images_s3_little', '/', 'Image');""")
+
+        cur.execute(
+            """SELECT aidb.create_volume('images_bucket_vol', 'images_s3_little', '/', 'Image');"""
+        )
+        # Create a model for image embeddings
         cur.execute("""SELECT aidb.create_model('multimodal_clip', 'clip_local');""")
-        cur.execute("""
-            SELECT aidb.create_retriever_for_volume(
-               name => 'recom_images',
-               model_name => 'multimodal_clip',
-               source_volume_name => 'images_bucket_vol'
+        # Create a knowledge base for the images bucket
+        cur.execute(
+            """
+            SELECT aidb.create_volume_knowledge_base(
+               name => 'recom_images'
+               ,model_name => 'multimodal_clip'
+               ,source_volume_name => 'images_bucket_vol'
+               ,batch_size => 500
        );
-        """)
+        """
+        )
         cur.execute(f"""SELECT aidb.bulk_embedding('recom_images');""")
         vector_time = time.time() - start_time
-        print(f"Creating and refreshing recom_images retriever took {vector_time:.4f} seconds.")
+        print(
+            f"Creating and refreshing recom_images retriever took {vector_time:.4f} seconds."
+        )
         start_time = time.time()
         # Run retriever for products table
         # The idea is to create a retriever for the products table so the text search can run over it.
-        cur.execute("""SELECT aidb.create_model('product_descriptions_embeddings', 
-                            'embeddings', 
-                            '{{"model": "gritlm-7b", 
-                            "url": "https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/embeddings", "dimensions":4096}}'::JSONB), 
-                            '{{"api_key":""}}'::JSONB, true);""")
-        
-        cur.execute("""SELECT aidb.create_retriever_for_table(
-                    name => 'recommend_products',
-                    model_name => 'product_descriptions_embeddings',
-                    source_table => 'products',
-                    source_key_column => 'img_id',
-                    source_data_column => 'productdisplayname',
-                    source_data_type => 'Text'
-                    );""")
-        cur.execute(f"""SELECT aidb.bulk_embedding('recommend_products');""")
-        
-        ########### WARNING: The below command will create a remote model ############
-        # So please replace the url with the OpenShift vLLM endpoint
-        # This is the GenAI model that will be used to generate review summary
+        # Create the model for text embeddings
+        config = json.dumps({
+        "model": "gritlm-7b"
+        ,"url": "https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/embeddings"
+        })
+
         cur.execute(
-            f"""select aidb.create_model('product_review_model', 'completions', '{{"model":"llama-31-8b-instruct", "url":"https://llama-31-8b-instruct-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/chat/completions"}}'::JSONB);"""
+            f"""
+            SELECT aidb.create_model(
+            'product_descriptions_embeddings'
+            ,'embeddings'
+            ,'{config}'::JSONB
+            );"""
+            )
+
+        cur.execute(
+            """SELECT aidb.create_table_knowledge_base(
+                    name => 'recommend_products'
+                    ,model_name => 'product_descriptions_embeddings'
+                    ,source_table => 'products'
+                    ,source_key_column => 'img_id'
+                    ,source_data_column => 'productdisplayname'
+                    ,source_data_format => 'Text'
+                    ,auto_processing =>'Live'
+                    ,batch_size => 1000
+                    );"""
+        )
+        cur.execute(f"""SELECT aidb.bulk_embedding('recommend_products');""")
+
+        
+        # This is the GenAI model that will be used to generate review summary
+        genai_config = json.dumps({
+            "model": "llama-31-8b-instruct"
+            ,"url": "https://llama-31-8b-instruct-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com/v1/chat/completions"
+        })
+        # Create the model for product review summarization
+        cur.execute(
+            f"""select aidb.create_model(
+            'product_review_model' 
+            ,'completions', 
+            ,'{genai_config}'::JSONB);"""
         )
         vector_time = time.time() - start_time
-        print(f"Creating and refreshing recom_products retriever took {vector_time:.4f} seconds.")
+        print(
+            f"Creating and refreshing recom_products retriever took {vector_time:.4f} seconds."
+        )
+
 
 def main():
-        conn=None
-        try:
-            conn = create_db_connection() # Connect to the database
-            conn.autocommit = True  # Enable autocommit for creating the database
-            start_time = time.time()
-            initialize_database(conn) # Initialize the db with aidb, pgfs extensions and necessary tables
-            populate_product_data(conn, './dataset/styles.csv') # Populate the products table with the stylesc.csv data
-            populate_product_review_data(conn, "dataset/product_reviews.csv")
-            create_and_refresh_retriever(conn) # Create and refresh the retriever for the products table and images bucket
-            vector_time = time.time() - start_time
-            print(f"Total process time: {vector_time:.4f} seconds.")
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(f"Error: {error}")
-        finally:
-            if conn:
-                    conn.close()
+    conn = None
+    try:
+        conn = create_db_connection()  # Connect to the database
+        conn.autocommit = True  # Enable autocommit for creating the database
+        start_time = time.time()
+        initialize_database(
+            conn
+        )  # Initialize the db with aidb, pgfs extensions and necessary tables
+        populate_product_data(
+            conn, "./dataset/styles.csv"
+        )  # Populate the products table with the stylesc.csv data
+        populate_product_review_data(conn, "dataset/product_reviews.csv")
+        create_and_refresh_retriever(
+            conn
+        )  # Create and refresh the retriever for the products table and images bucket
+        vector_time = time.time() - start_time
+        print(f"Total process time: {vector_time:.4f} seconds.")
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(f"Error: {error}")
+    finally:
+        if conn:
+            conn.close()
+
 
 if __name__ == "__main__":
-    #main()
+    # main()
     upload_images_to_s3()
