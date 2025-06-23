@@ -4,7 +4,7 @@ metadata:
   annotations:
     deployment.kubernetes.io/revision: '2'
   name: {{.Values.applicationName}}-database-deployment
-  namespace: {{.Values.targetNamespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ai-recommender.primary-labels" $ | indent 4 }}
 spec:
@@ -38,5 +38,5 @@ spec:
             - name: POSTGRESQL_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{.Values.applicationName}}-secret-map
-                  key: database-password
+                  name: secret-map
+                  key: DATABASE_PASSWORD

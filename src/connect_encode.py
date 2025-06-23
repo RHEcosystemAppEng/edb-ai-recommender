@@ -38,7 +38,7 @@ def _create_tables(cur):
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS products (
-            img_id TEXT,
+            product_id TEXT,
             gender VARCHAR(50),
             masterCategory VARCHAR(100),
             subCategory VARCHAR(100),

@@ -6,10 +6,8 @@ metadata:
     serving.knative.openshift.io/enablePassthrough: 'true'
     sidecar.istio.io/inject: 'true'
     sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+    serving.kserve.io/deploymentMode: RawDeployment
   name: llama-31-8b-instruct
-  namespace: {{.Release.Namespace}}
-  finalizers:
-    - inferenceservice.finalizers
   labels:
     opendatahub.io/dashboard: 'true'
 spec:
@@ -35,8 +33,10 @@ spec:
           nvidia.com/gpu: '1'
       runtime: llama-31-8b-instruct
       storage:
-        key: secret-s3-bucket
+        key: storage-config
         path: Llama-3.1-8B-Instruct
+    nodeSelector:
+      nvidia.com/gpu.present: "true"
     tolerations:
       - effect: NoSchedule
         key: nvidia.com/gpu
@@ -44,4 +44,3 @@ spec:
       - effect: NoSchedule
         key: odh-notebook
         operator: Exists
-  url: 'https://llama-31-8b-instruct-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com'

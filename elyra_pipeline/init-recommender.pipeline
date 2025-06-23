@@ -19,12 +19,7 @@
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -79,16 +74,12 @@
             "component_parameters": {
               "dependencies": [
                 "postgres_utilities.py",
-                "products.csv"
+                "products.csv",
+                "product_reviews.csv"
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -157,36 +148,7 @@
               ],
               "include_subdirectories": true,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "S3_ENDPOINT_URL",
-                  "value": "https://minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "S3_BUCKET_NAME",
-                  "value": "edb-aidb"
-                },
-                {
-                  "env_var": "S3_REGION",
-                  "value": "us-east-1"
-                },
-                {
-                  "env_var": "S3_SKIP_SIGNATURE",
-                  "value": "true"
-                },
-                {
-                  "env_var": "S3_ACCESS_KEY",
-                  "value": "minio"
-                },
-                {
-                  "env_var": "S3_SECRET_KEY",
-                  "value": "minio1234!"
-                },
-                {
-                  "env_var": "S3_RECOMMENDER_IMAGES_PATH",
-                  "value": "recommender_images"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -199,8 +161,8 @@
             "ui_data": {
               "label": "upload_images.ipynb",
               "image": "/notebook/samouelian-edb-ai/edb-aidb-workbench/static/elyra/notebook.svg",
-              "x_pos": 423,
-              "y_pos": 382,
+              "x_pos": 422,
+              "y_pos": 381,
               "description": "Run notebook file"
             }
           },
@@ -252,48 +214,7 @@
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                },
-                {
-                  "env_var": "S3_ENDPOINT_URL",
-                  "value": "https://minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "S3_BUCKET_NAME",
-                  "value": "edb-aidb"
-                },
-                {
-                  "env_var": "S3_REGION",
-                  "value": "us-east-1"
-                },
-                {
-                  "env_var": "S3_SKIP_SIGNATURE",
-                  "value": "true"
-                },
-                {
-                  "env_var": "S3_ACCESS_KEY",
-                  "value": "minio"
-                },
-                {
-                  "env_var": "S3_SECRET_KEY",
-                  "value": "minio1234!"
-                },
-                {
-                  "env_var": "S3_RECOMMENDER_IMAGES_PATH",
-                  "value": "recommender_images"
-                },
-                {
-                  "env_var": "TEXT_EMBEDDING_ENDPOINT",
-                  "value": "https://gritlm-7b-samouelian-edb-ai.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "TEXT_EMBEDDING_MODEL_NAME",
-                  "value": "gritlm-7b"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -364,40 +285,7 @@
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                },
-                {
-                  "env_var": "S3_ENDPOINT_URL",
-                  "value": "https://minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "S3_BUCKET_NAME",
-                  "value": "edb-aidb"
-                },
-                {
-                  "env_var": "S3_REGION",
-                  "value": "us-east-1"
-                },
-                {
-                  "env_var": "S3_SKIP_SIGNATURE",
-                  "value": "true"
-                },
-                {
-                  "env_var": "S3_ACCESS_KEY",
-                  "value": "minio"
-                },
-                {
-                  "env_var": "S3_SECRET_KEY",
-                  "value": "minio1234!"
-                },
-                {
-                  "env_var": "S3_RECOMMENDER_IMAGES_PATH",
-                  "value": "recommender_images"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -463,40 +351,7 @@
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                },
-                {
-                  "env_var": "S3_ENDPOINT_URL",
-                  "value": "https://minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "S3_BUCKET_NAME",
-                  "value": "edb-aidb"
-                },
-                {
-                  "env_var": "S3_REGION",
-                  "value": "us-east-1"
-                },
-                {
-                  "env_var": "S3_SKIP_SIGNATURE",
-                  "value": "true"
-                },
-                {
-                  "env_var": "S3_ACCESS_KEY",
-                  "value": "minio"
-                },
-                {
-                  "env_var": "S3_SECRET_KEY",
-                  "value": "minio1234!"
-                },
-                {
-                  "env_var": "S3_RECOMMENDER_IMAGES_PATH",
-                  "value": "recommender_images"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -562,40 +417,7 @@
               ],
               "include_subdirectories": false,
               "outputs": [],
-              "env_vars": [
-                {
-                  "env_var": "URI",
-                  "value": "postgresql://postgres:edbtest123@edb-aidb.samouelian-edb-ai.svc.cluster.local:5432/postgres"
-                },
-                {
-                  "env_var": "S3_ENDPOINT_URL",
-                  "value": "https://minio-api-minio.apps.ai-dev01.kni.syseng.devcluster.openshift.com"
-                },
-                {
-                  "env_var": "S3_BUCKET_NAME",
-                  "value": "edb-aidb"
-                },
-                {
-                  "env_var": "S3_REGION",
-                  "value": "us-east-1"
-                },
-                {
-                  "env_var": "S3_SKIP_SIGNATURE",
-                  "value": "true"
-                },
-                {
-                  "env_var": "S3_ACCESS_KEY",
-                  "value": "minio"
-                },
-                {
-                  "env_var": "S3_SECRET_KEY",
-                  "value": "minio1234!"
-                },
-                {
-                  "env_var": "S3_RECOMMENDER_IMAGES_PATH",
-                  "value": "recommender_images"
-                }
-              ],
+              "env_vars": [],
               "kubernetes_pod_annotations": [],
               "kubernetes_pod_labels": [],
               "kubernetes_secrets": [],
@@ -655,7 +477,7 @@
           "comments": [
             {
               "id": "df18dc95-6129-4ffd-a5ff-dc346e3afdf1",
-              "x_pos": 38,
+              "x_pos": 39,
               "y_pos": 49,
               "width": 175,
               "height": 86,
@@ -685,8 +507,8 @@
               "id": "27308ba1-184e-4f8f-ace6-ea157076ab88",
               "x_pos": 416,
               "y_pos": 521,
-              "width": 175,
-              "height": 58,
+              "width": 173,
+              "height": 48,
               "content": "Upload product images to in-cluster MinIO bucket.",
               "associated_id_refs": [
                 {
@@ -728,7 +550,7 @@
               "x_pos": 920,
               "y_pos": 499,
               "width": 175,
-              "height": 58,
+              "height": 44,
               "content": "Resize images to fit vision model's context length.",
               "associated_id_refs": [
                 {
@@ -759,14 +581,75 @@
           "name": "init-recommender",
           "runtime": "Data Science Pipelines",
           "pipeline_defaults": {
-            "kubernetes_pod_labels": [],
-            "mounted_volumes": [],
-            "kubernetes_tolerations": [],
             "kubernetes_pod_annotations": [],
             "kubernetes_shared_mem_size": {
               "size": 7
             },
-            "kubernetes_secrets": [],
+            "kubernetes_pod_labels": [],
+            "mounted_volumes": [],
+            "kubernetes_tolerations": [],
+            "kubernetes_secrets": [
+              {
+                "env_var": "POSTGRES_URI",
+                "name": "secret-map",
+                "key": "POSTGRES_URI"
+              },
+              {
+                "env_var": "S3_ENDPOINT_URL",
+                "name": "secret-map",
+                "key": "AWS_S3_ENDPOINT"
+              },
+              {
+                "env_var": "S3_BUCKET_NAME",
+                "name": "secret-map",
+                "key": "AWS_S3_BUCKET"
+              },
+              {
+                "env_var": "S3_REGION",
+                "name": "secret-map",
+                "key": "AWS_DEFAULT_REGION"
+              },
+              {
+                "env_var": "S3_SKIP_SIGNATURE",
+                "name": "secret-map",
+                "key": "S3_SKIP_SIGNATURE"
+              },
+              {
+                "env_var": "S3_ACCESS_KEY",
+                "name": "secret-map",
+                "key": "AWS_SECRET_ACCESS_KEY"
+              },
+              {
+                "env_var": "S3_SECRET_KEY",
+                "name": "secret-map",
+                "key": "AWS_SECRET_ACCESS_KEY"
+              },
+              {
+                "env_var": "S3_RECOMMENDER_IMAGES_PATH",
+                "name": "secret-map",
+                "key": "S3_RECOMMENDER_IMAGES_PATH"
+              },
+              {
+                "env_var": "TEXT_EMBEDDING_MODEL_NAME",
+                "name": "secret-map",
+                "key": "TEXT_EMBEDDING_MODEL_NAME"
+              },
+              {
+                "env_var": "TEXT_EMBEDDING_ENDPOINT",
+                "name": "secret-map",
+                "key": "TEXT_EMBEDDING_ENDPOINT"
+              },
+              {
+                "env_var": "GENERATIVE_MODEL_NAME",
+                "name": "secret-map",
+                "key": "GENERATIVE_MODEL_NAME"
+              },
+              {
+                "env_var": "GENERATIVE_ENDPOINT",
+                "name": "secret-map",
+                "key": "GENERATIVE_ENDPOINT"
+              }
+            ],
             "env_vars": [],
             "runtime_image": "quay.io/rh-ee-psamouel/edb/custom-elyra-image"
           },

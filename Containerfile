@@ -12,8 +12,13 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     git
 
+RUN mkdir -p /home/appuser/.streamlit \
+    && chmod -R 777 /home/appuser/.streamlit
+
+
 USER appuser
 WORKDIR /home/appuser
+ENV HOME=/home/appuser
 
 RUN git clone https://github.com/RHEcosystemAppEng/edb-ai-recommender.git app
 

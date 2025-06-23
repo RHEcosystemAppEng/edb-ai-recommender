@@ -5,11 +5,10 @@ metadata:
     opendatahub.io/accelerator-name: migrated-gpu
     opendatahub.io/apiProtocol: REST
     opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
-    opendatahub.io/template-display-name: vLLM ServingRuntime for KServe (v0.6.6)
+    opendatahub.io/template-display-name: vLLM ServingRuntime for KServe
     opendatahub.io/template-name: vllm-runtime-copy
     openshift.io/display-name: llama-31-8b-instruct
   name: llama-31-8b-instruct
-  namespace: {{ .Release.Namespace }}
   labels:
     opendatahub.io/dashboard: 'true'
 spec:
@@ -17,10 +16,11 @@ spec:
     prometheus.io/path: /metrics
     prometheus.io/port: '8080'
   containers:
+    - name: kserve-container
     - args:
         - '--port=8080'
         - '--model=/mnt/models'
-        - '--served-model-name={{.Name}}'
+        - '--served-model-name=llama-31-8b-instruct'
       command:
         - python
         - '-m'
@@ -28,7 +28,7 @@ spec:
       env:
         - name: HF_HOME
           value: /tmp/hf_home
-      image: 'quay.io/redhat-ai-dev/vllm-openai-ubi9@sha256:22a063f488acc913d0829376b3c256653790ef922b46a315e242cfd3b4cead31'
+      image: 'quay.io/redhat-ai-dev/vllm-openai-ubi9@sha256:0263820c65679edbff197aa914fb808f96a46a985119de306e58c9f64ade8897'
       name: kserve-container
       ports:
         - containerPort: 8080

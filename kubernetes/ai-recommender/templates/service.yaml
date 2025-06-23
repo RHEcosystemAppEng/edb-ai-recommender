@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{.Values.applicationName}}-web-application-service
-  namespace: {{.Values.targetNamespace}}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "ai-recommender.primary-labels" $ | indent 4 }}
 spec:
