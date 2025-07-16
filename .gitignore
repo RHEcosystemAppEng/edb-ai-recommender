@@ -8,6 +8,9 @@ node_modules/
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
 
+# Environment variables
+.env
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
