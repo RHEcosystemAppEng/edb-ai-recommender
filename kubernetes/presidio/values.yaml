@@ -1,0 +1,55 @@
+# Default values for presidio-analyzer
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Deployment configuration
+deployment:
+  name: presidio-analyzer
+  replicas: 1
+  
+# Container configuration
+image:
+  repository: quay.io/rh-ee-vli/trustyai-guardrails-presidio-pii
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Service configuration
+service:
+  name: presidio-analyzer-service
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  protocol: TCP
+
+# Route configuration (OpenShift specific)
+route:
+  enabled: true
+  name: presidio-analyzer-route
+  domain: apps.example.com
+  tls:
+    enabled: true
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+
+# Labels
+labels:
+  app: presidio-analyzer
+  deployment: presidio-analyzer
+
+# Pod resources (optional)
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+  #   memory: 256Mi
+
+# Node selector (optional)
+nodeSelector: {}
+
+# Tolerations (optional)
+tolerations: []
+
+# Affinity (optional)
+affinity: {}
