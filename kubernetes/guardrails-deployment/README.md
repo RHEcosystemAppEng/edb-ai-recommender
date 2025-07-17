@@ -1,212 +1,378 @@
 # TrustyAI Guardrails Helm Chart
 
-This Helm chart deploys TrustyAI Guardrails with Presidio PII detection capabilities on Kubernetes.
+This Helm chart deploys a TrustyAI GuardrailsOrchestrator custom resource that integrates with existing AI safety and compliance services.
 
 ## Overview
 
-TrustyAI Guardrails provides a framework for implementing AI safety and compliance measures. This chart deploys:
+This chart creates:
 
-- **TrustyAI Guardrails Orchestrator**: The main orchestrator service that coordinates between LLM services and detectors
-- **Presidio Analyzer**: Microsoft's Presidio for PII (Personally Identifiable Information) detection
-- **Optional LLM Service**: Can deploy a local LLM service or connect to external ones
+- **GuardrailsOrchestrator Custom Resource**: A TrustyAI CRD that orchestrates between LLM services and safety detectors
+- **ConfigMap**: Configuration for connecting to external services (LLM, Presidio, Llama Guard, etc.)
+
+**Note**: This chart does NOT deploy the actual detector services (Presidio, Llama Guard) or LLM services. These must be deployed separately and made accessible to the orchestrator.
 
 ## Prerequisites
 
-- Kubernetes 1.19+
+- Kubernetes 1.19+ or OpenShift 4.6+
 - Helm 3.0+
-- TrustyAI Operator installed in the cluster
-- Access to container registries (Quay.io, etc.)
+- **TrustyAI Operator installed** (provides the GuardrailsOrchestrator CRD)
+  - For OpenShift: Install from OperatorHub in the OpenShift Console
+  - For Kubernetes: Follow the [TrustyAI Operator installation guide](https://github.com/trustyai-explainability/trustyai-operator)
+- Pre-deployed services:
+  - LLM service (e.g., Llama 3.1)
+  - Presidio Analyzer service (for PII detection)
+  - Llama Guard service (optional, for content moderation)
+
+### Installing TrustyAI Operator on OpenShift
+
+1. **Via OpenShift Console**:
+   - Navigate to Operators → OperatorHub
+   - Search for "TrustyAI"
+   - Click Install and follow the prompts
+
+2. **Via CLI**:
+   ```bash
+   # Create the operator namespace
+   oc create namespace trustyai-operator-system
+   
+   # Apply the operator subscription
+   cat <<EOF | oc apply -f -
+   apiVersion: operators.coreos.com/v1alpha1
+   kind: Subscription
+   metadata:
+     name: trustyai-operator
+     namespace: openshift-operators
+   spec:
+     channel: stable
+     name: trustyai-operator
+     source: redhat-operators
+     sourceNamespace: openshift-marketplace
+   EOF
+   
+   # Verify operator is running
+   oc get pods -n trustyai-operator-system
+   ```
 
 ## Installation
 
 ### Quick Start
 
 ```bash
-# Add the Helm repository (if using a repository)
-helm repo add trustyai https://trustyai.github.io/charts
-
-# Install the chart
+# For Kubernetes
 helm install trustyai-guardrails ./guardrails-deployment \
-  --namespace trustyai-guardrails \
+  --namespace guardrails-presidio \
   --create-namespace
+
+# For OpenShift
+oc new-project guardrails-presidio
+helm install trustyai-guardrails ./guardrails-deployment \
+  --namespace guardrails-presidio
 ```
 
 ### Custom Configuration
 
 ```bash
-# Install with custom values
+# For Kubernetes
 helm install trustyai-guardrails ./guardrails-deployment \
-  --namespace trustyai-guardrails \
+  --namespace my-namespace \
   --create-namespace \
+  --values custom-values.yaml
+
+# For OpenShift
+oc new-project my-namespace
+helm install trustyai-guardrails ./guardrails-deployment \
+  --namespace my-namespace \
   --values custom-values.yaml
 ```
 
 ## Configuration
 
-### Values File
+### Default Values
 
-The following table lists the configurable parameters and their default values:
+The following table lists the configurable parameters and their default values from `values.yaml`:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `orchestrator.enabled` | Enable TrustyAI Orchestrator | `true` |
-| `orchestrator.replicas` | Number of orchestrator replicas | `1` |
-| `orchestrator.image.repository` | Orchestrator image repository | `quay.io/trustyai/trustyai-guardrails-orchestrator` |
-| `orchestrator.image.tag` | Orchestrator image tag | `latest` |
-| `presidio.enabled` | Enable Presidio Analyzer | `true` |
-| `presidio.replicas` | Number of Presidio replicas | `1` |
-| `presidio.image.repository` | Presidio image repository | `quay.io/rh-ee-vli/trustyai-guardrails-presidio-pii` |
-| `presidio.image.tag` | Presidio image tag | `latest` |
-| `llm.enabled` | Enable local LLM service | `false` |
-| `llm.image.repository` | LLM image repository | `quay.io/trustyai/llama-3-1-8b-instruct` |
+| `namespace` | Kubernetes namespace for deployment | `guardrails-presidio` |
+| **Orchestrator** | | |
+| `orchestrator.name` | Name of the GuardrailsOrchestrator resource | `gorch-sample` |
+| `orchestrator.replicas` | Number of orchestrator pod replicas | `1` |
+| `orchestrator.configMapName` | Name of the ConfigMap for orchestrator config | `fms-orchestr8-config-nlp` |
+| **Chat Generation Service** | | |
+| `chatGeneration.service.hostname` | LLM service hostname | `llama-3-1-8b-instruct-predictor.rag-demo-16.svc.cluster.local` |
+| `chatGeneration.service.port` | LLM service port | `8080` |
+| **Detectors** | | |
+| `detectors.presidioPii.enabled` | Enable Presidio PII detector | `true` |
+| `detectors.presidioPii.type` | Detector type | `text_contents` |
+| `detectors.presidioPii.service.hostname` | Presidio service hostname | `presidio-analyzer.guardrails-presidio.svc.cluster.local` |
+| `detectors.presidioPii.service.port` | Presidio service port | `3000` |
+| `detectors.presidioPii.chunker_id` | Text chunking strategy | `whole_doc_chunker` |
+| `detectors.presidioPii.defaultThreshold` | Detection confidence threshold | `0.5` |
+| `detectors.presidioPii.language` | Language for detection | `en` |
+| `detectors.llamaGuard3.enabled` | Enable Llama Guard 3 detector | `true` |
+| `detectors.llamaGuard3.service.hostname` | Llama Guard service hostname | `llama-guard-wrapper.guardrails-presidio.svc.cluster.local` |
+| `detectors.llamaGuard3.service.port` | Llama Guard service port | `3001` |
+| **Passthrough Headers** | | |
+| `passthroughHeaders` | Headers to pass through to services | `["content-type"]` |
 
-### LLM Configuration
+### Example Custom Values
 
-The chart can connect to external LLM services or deploy a local one:
-
-```yaml
-orchestrator:
-  config:
-    llm:
-      enabled: true
-      service:
-        hostname: "llama-3-1-8b-instruct-predictor.rag-demo-16.svc.cluster.local"
-        port: 8080
-        timeout: 30s
-```
-
-### Presidio Configuration
-
-Presidio can be configured for different PII detection scenarios:
+Create a `custom-values.yaml` file:
 
 ```yaml
+namespace: my-guardrails
+
 orchestrator:
-  config:
-    detectors:
-      presidio-pii:
-        enabled: true
-        type: "text_contents"
-        service:
-          hostname: "presidio-analyzer.trustyai-guardrails.svc.cluster.local"
-          port: 3000
-        chunker_id: "whole_doc_chunker"
-        default_threshold: 0.5
-        language: "en"
-```
+  name: production-orchestrator
+  replicas: 3
+  configMapName: prod-orchestrator-config
 
-## Usage
+chatGeneration:
+  service:
+    hostname: my-llm-service.production.svc.cluster.local
+    port: 8080
 
-### Testing the Deployment
+detectors:
+  presidioPii:
+    enabled: true
+    defaultThreshold: 0.7  # More strict threshold
+    service:
+      hostname: presidio.production.svc.cluster.local
+      port: 3000
+  
+  llamaGuard3:
+    enabled: false  # Disable Llama Guard
 
-1. **Port Forward to the Orchestrator**:
-   ```bash
-   kubectl port-forward svc/trustyai-guardrails-orchestrator 8080:8080 -n trustyai-guardrails
-   ```
-
-2. **Test PII Detection**:
-   ```bash
-   curl -X POST http://localhost:8080/chat \
-     -H "Content-Type: application/json" \
-     -d '{
-       "messages": [
-         {
-           "role": "user", 
-           "content": "My name is John Doe and my email is john@example.com"
-         }
-       ]
-     }'
-   ```
-
-3. **Expected Response**:
-   ```json
-   {
-     "response": "I cannot provide personal information about individuals.",
-     "detections": [
-       {
-         "type": "presidio-pii",
-         "entities": [
-           {
-             "entity_type": "PERSON",
-             "start": 11,
-             "end": 19,
-             "score": 0.95
-           },
-           {
-             "entity_type": "EMAIL_ADDRESS",
-             "start": 35,
-             "end": 52,
-             "score": 0.98
-           }
-         ]
-       }
-     ]
-   }
-   ```
-
-### Monitoring
-
-Check the status of your deployment:
-
-```bash
-# Check pods
-kubectl get pods -n trustyai-guardrails
-
-# Check services
-kubectl get svc -n trustyai-guardrails
-
-# Check logs
-kubectl logs -f deployment/trustyai-guardrails-orchestrator -n trustyai-guardrails
-kubectl logs -f deployment/trustyai-guardrails-presidio -n trustyai-guardrails
+passthroughHeaders:
+  - content-type
+  - authorization
+  - x-request-id
 ```
 
 ## Architecture
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Client App    │───▶│   Orchestrator   │───▶│  LLM Service    │
-│                 │    │                  │    │                 │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌──────────────────┐
-                       │ Presidio Analyzer│
-                       │   (PII Detection)│
-                       └──────────────────┘
+                        ┌───────────────────────────────────┐
+                        │   TrustyAI Operator               │
+                        │   (manages GuardrailsOrchestrator)│
+                        └────────────┬──────────────────────┘
+                                     │ creates/manages
+                                     ▼
+┌──────────────┐      ┌──────────────────────────────────┐
+│  Client App  │─────▶│  GuardrailsOrchestrator Pods     │
+│              │      │  (created by this chart)         │
+└──────────────┘      └────────────┬─────────────────────┘
+                                   │ routes requests to
+                    ┌──────────────┴───────────────────────┐
+                    ▼                                      ▼
+        ┌─────────────────────┐              ┌──────────────────────┐
+        │  External Services  │              │   Safety Detectors   │
+        ├─────────────────────┤              ├──────────────────────┤
+        │ • LLM Service       │              │ • Presidio Analyzer  │
+        │   (Llama 3.1, etc.) │              │ • Llama Guard 3      │
+        └─────────────────────┘              └──────────────────────┘
 ```
+
+### Request Flow
+
+1. Client sends request to GuardrailsOrchestrator
+2. Orchestrator checks content with configured detectors (Presidio, Llama Guard)
+3. If content passes safety checks, request is forwarded to LLM service
+4. Response from LLM is checked again by detectors
+5. Safe response is returned to client
+
+## Usage
+
+### Verify Deployment
+
+1. **Check Custom Resource**:
+   ```bash
+   # Kubernetes
+   kubectl get guardrailsorchestrator -n guardrails-presidio
+   
+   # OpenShift
+   oc get guardrailsorchestrator -n guardrails-presidio
+   ```
+
+2. **Check Generated Pods** (created by the operator):
+   ```bash
+   # Kubernetes
+   kubectl get pods -n guardrails-presidio -l app.kubernetes.io/name=guardrails-orchestrator
+   
+   # OpenShift
+   oc get pods -n guardrails-presidio -l app.kubernetes.io/name=guardrails-orchestrator
+   ```
+
+3. **View Configuration**:
+   ```bash
+   # Kubernetes
+   kubectl get configmap fms-orchestr8-config-nlp -n guardrails-presidio -o yaml
+   
+   # OpenShift
+   oc get configmap fms-orchestr8-config-nlp -n guardrails-presidio -o yaml
+   ```
+
+### Testing the Deployment
+
+1. **Port Forward to the Orchestrator**:
+   ```bash
+   # Kubernetes
+   kubectl port-forward svc/gorch-sample -n guardrails-presidio 8080:8080
+   
+   # OpenShift
+   oc port-forward svc/gorch-sample -n guardrails-presidio 8080:8080
+   ```
+
+   **For OpenShift Route** (alternative to port-forward):
+   ```bash
+   # Create a route to expose the service
+   oc expose svc/gorch-sample -n guardrails-presidio
+   
+   # Get the route URL
+   oc get route gorch-sample -n guardrails-presidio -o jsonpath='{.spec.host}'
+   ```
+
+2. **Test Request with PII**:
+   ```bash
+   # Using port-forward (both Kubernetes and OpenShift)
+   curl -X POST http://localhost:8080/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -d '{
+       "messages": [
+         {
+           "role": "user", 
+           "content": "My name is John Doe and my SSN is 123-45-6789"
+         }
+       ]
+     }'
+   
+   # Using OpenShift route
+   ROUTE_URL=$(oc get route gorch-sample -n guardrails-presidio -o jsonpath='{.spec.host}')
+   curl -X POST http://${ROUTE_URL}/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -d '{
+       "messages": [
+         {
+           "role": "user", 
+           "content": "My name is John Doe and my SSN is 123-45-6789"
+         }
+       ]
+     }'
+   ```
+
+3. **Expected Behavior**:
+   - Presidio will detect PII (name and SSN)
+   - Llama Guard may flag content safety issues
+   - Request may be blocked or sanitized based on detector thresholds
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Image Pull Errors**:
-   - Ensure you have access to the container registries
-   - Check image pull secrets if using private registries
+1. **GuardrailsOrchestrator Not Created**:
+   ```bash
+   # Ensure TrustyAI Operator is installed
+   # Kubernetes
+   kubectl get crd guardrailsorchestrators.trustyai.opendatahub.io
+   
+   # OpenShift
+   oc get crd guardrailsorchestrators.trustyai.opendatahub.io
+   ```
+   - Check operator logs if CRD exists but resource isn't created
 
-2. **Service Connection Issues**:
-   - Verify LLM service is accessible from the cluster
-   - Check network policies and service mesh configurations
+2. **Service Connection Errors**:
+   - Verify external services are running and accessible
+   - Check service DNS names resolve correctly
+   - Ensure network policies allow communication
+   - **OpenShift**: Check Security Context Constraints (SCCs) if pods fail to start
 
-3. **Presidio Model Loading**:
-   - Presidio may take time to download NLP models on first startup
-   - Check logs for model download progress
+3. **Detector Not Working**:
+   - Check detector service logs
+   - Verify detector is enabled in values
+   - Confirm detector service endpoint is correct
 
 ### Debug Commands
 
 ```bash
-# Check pod status
-kubectl describe pod -l app.kubernetes.io/name=trustyai-guardrails -n trustyai-guardrails
+# Check GuardrailsOrchestrator status
+# Kubernetes
+kubectl describe guardrailsorchestrator gorch-sample -n guardrails-presidio
 
-# Check service endpoints
-kubectl get endpoints -n trustyai-guardrails
+# OpenShift
+oc describe guardrailsorchestrator gorch-sample -n guardrails-presidio
 
-# Check ConfigMap
-kubectl get configmap trustyai-guardrails-orchestrator-config -n trustyai-guardrails -o yaml
+# Check orchestrator pods logs
+# Kubernetes
+kubectl logs -l app.kubernetes.io/name=guardrails-orchestrator -n guardrails-presidio
+
+# OpenShift
+oc logs -l app.kubernetes.io/name=guardrails-orchestrator -n guardrails-presidio
+
+# Test service connectivity
+# Kubernetes
+kubectl run test-pod --image=busybox -n guardrails-presidio --rm -it -- wget -O- presidio-analyzer.guardrails-presidio.svc.cluster.local:3000/health
+
+# OpenShift
+oc run test-pod --image=busybox -n guardrails-presidio --rm -it -- wget -O- presidio-analyzer.guardrails-presidio.svc.cluster.local:3000/health
+
+# OpenShift-specific: Check project status
+oc status -n guardrails-presidio
+
+# OpenShift-specific: View in web console
+oc console
+```
+
+### OpenShift-Specific Considerations
+
+1. **Security Context Constraints (SCCs)**:
+   ```bash
+   # Check if pods need specific SCCs
+   oc get pod -n guardrails-presidio -o yaml | grep scc
+   
+   # If needed, grant SCC to service account
+   oc adm policy add-scc-to-user anyuid -z default -n guardrails-presidio
+   ```
+
+2. **Network Policies**:
+   ```bash
+   # List network policies
+   oc get networkpolicy -n guardrails-presidio
+   ```
+
+3. **Resource Quotas**:
+   ```bash
+   # Check project quotas
+   oc describe quota -n guardrails-presidio
+   oc describe limits -n guardrails-presidio
+   ```
+
+## Chart Structure
+
+```
+guardrails-deployment/
+├── Chart.yaml                 # Chart metadata
+├── values.yaml               # Default configuration values
+├── README.md                 # This file
+├── .helmignore              # Files to ignore
+├── templates/
+│   ├── guardrails_orchestrator.yaml  # GuardrailsOrchestrator CR
+│   ├── orchestrator_config.yaml      # ConfigMap with orchestrator config
+│   └── _helpers.tpl                  # Template helpers
+└── charts/                   # Dependency charts (if any)
 ```
 
 ## Uninstallation
 
 ```bash
-helm uninstall trustyai-guardrails -n trustyai-guardrails
+# Kubernetes
+helm uninstall trustyai-guardrails -n guardrails-presidio
+
+# OpenShift
+helm uninstall trustyai-guardrails -n guardrails-presidio
+oc delete project guardrails-presidio  # Optional: remove the entire project
+
+# Or if installed in a custom namespace
+helm uninstall trustyai-guardrails -n my-namespace
 ```
 
 ## Contributing
