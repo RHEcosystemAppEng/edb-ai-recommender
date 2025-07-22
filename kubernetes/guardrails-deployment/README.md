@@ -20,7 +20,7 @@ This chart creates:
   - For Kubernetes: Follow the [TrustyAI Operator installation guide](https://github.com/trustyai-explainability/trustyai-operator)
 - Pre-deployed services:
   - LLM service (e.g., Llama 3.1)
-  - Presidio Analyzer service (for PII detection)
+  - Presidio Analyzer service (optional, for PII detection)
   - Llama Guard service (optional, for content moderation)
 
 ### Installing TrustyAI Operator on OpenShift
@@ -60,13 +60,13 @@ This chart creates:
 ```bash
 # For Kubernetes
 helm install trustyai-guardrails ./guardrails-deployment \
-  --namespace guardrails-presidio \
+  --namespace guardrails-demo \
   --create-namespace
 
 # For OpenShift
-oc new-project guardrails-presidio
+oc new-project guardrails-demo
 helm install trustyai-guardrails ./guardrails-deployment \
-  --namespace guardrails-presidio
+  --namespace guardrails-demo
 ```
 
 ### Custom Configuration
@@ -93,24 +93,24 @@ The following table lists the configurable parameters and their default values f
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `namespace` | Kubernetes namespace for deployment | `guardrails-presidio` |
+| `namespace` | Kubernetes namespace for deployment | `guardrails-demo` |
 | **Orchestrator** | | |
 | `orchestrator.name` | Name of the GuardrailsOrchestrator resource | `gorch-sample` |
 | `orchestrator.replicas` | Number of orchestrator pod replicas | `1` |
 | `orchestrator.configMapName` | Name of the ConfigMap for orchestrator config | `fms-orchestr8-config-nlp` |
 | **Chat Generation Service** | | |
-| `chatGeneration.service.hostname` | LLM service hostname | `llama-3-1-8b-instruct-predictor.rag-demo-16.svc.cluster.local` |
+| `chatGeneration.service.hostname` | LLM service hostname | `llama-31-8b-instruct-predictor.llama-models.svc.cluster.local` |
 | `chatGeneration.service.port` | LLM service port | `8080` |
 | **Detectors** | | |
 | `detectors.presidioPii.enabled` | Enable Presidio PII detector | `true` |
 | `detectors.presidioPii.type` | Detector type | `text_contents` |
-| `detectors.presidioPii.service.hostname` | Presidio service hostname | `presidio-analyzer.guardrails-presidio.svc.cluster.local` |
+| `detectors.presidioPii.service.hostname` | Presidio service hostname | `presidio-analyzer.guardrails-demo.svc.cluster.local` |
 | `detectors.presidioPii.service.port` | Presidio service port | `3000` |
 | `detectors.presidioPii.chunker_id` | Text chunking strategy | `whole_doc_chunker` |
 | `detectors.presidioPii.defaultThreshold` | Detection confidence threshold | `0.5` |
 | `detectors.presidioPii.language` | Language for detection | `en` |
 | `detectors.llamaGuard3.enabled` | Enable Llama Guard 3 detector | `true` |
-| `detectors.llamaGuard3.service.hostname` | Llama Guard service hostname | `llama-guard-wrapper.guardrails-presidio.svc.cluster.local` |
+| `detectors.llamaGuard3.service.hostname` | Llama Guard service hostname | `llama-guard-wrapper.guardrails-demo.svc.cluster.local` |
 | `detectors.llamaGuard3.service.port` | Llama Guard service port | `3001` |
 | **Passthrough Headers** | | |
 | `passthroughHeaders` | Headers to pass through to services | `["content-type"]` |
@@ -188,28 +188,28 @@ passthroughHeaders:
 1. **Check Custom Resource**:
    ```bash
    # Kubernetes
-   kubectl get guardrailsorchestrator -n guardrails-presidio
+   kubectl get guardrailsorchestrator -n guardrails-demo
    
    # OpenShift
-   oc get guardrailsorchestrator -n guardrails-presidio
+   oc get guardrailsorchestrator -n guardrails-demo
    ```
 
 2. **Check Generated Pods** (created by the operator):
    ```bash
    # Kubernetes
-   kubectl get pods -n guardrails-presidio -l app.kubernetes.io/name=guardrails-orchestrator
+   kubectl get pods -n guardrails-demo -l app.kubernetes.io/name=guardrails-demo
    
    # OpenShift
-   oc get pods -n guardrails-presidio -l app.kubernetes.io/name=guardrails-orchestrator
+   oc get pods -n guardrails-demo -l app.kubernetes.io/name=guardrails-demo
    ```
 
 3. **View Configuration**:
    ```bash
    # Kubernetes
-   kubectl get configmap fms-orchestr8-config-nlp -n guardrails-presidio -o yaml
+   kubectl get configmap fms-orchestr8-config-nlp -n guardrails-demo -o yaml
    
    # OpenShift
-   oc get configmap fms-orchestr8-config-nlp -n guardrails-presidio -o yaml
+   oc get configmap fms-orchestr8-config-nlp -n guardrails-demo -o yaml
    ```
 
 ### Testing the Deployment
@@ -217,19 +217,19 @@ passthroughHeaders:
 1. **Port Forward to the Orchestrator**:
    ```bash
    # Kubernetes
-   kubectl port-forward svc/gorch-sample -n guardrails-presidio 8080:8080
+   kubectl port-forward svc/gorch-sample -n guardrails-demo 8080:8080
    
    # OpenShift
-   oc port-forward svc/gorch-sample -n guardrails-presidio 8080:8080
+   oc port-forward svc/gorch-sample -n guardrails-demo 8080:8080
    ```
 
    **For OpenShift Route** (alternative to port-forward):
    ```bash
    # Create a route to expose the service
-   oc expose svc/gorch-sample -n guardrails-presidio
+   oc expose svc/gorch-sample -n guardrails-demo
    
    # Get the route URL
-   oc get route gorch-sample -n guardrails-presidio -o jsonpath='{.spec.host}'
+   oc get route gorch-sample -n guardrails-demo -o jsonpath='{.spec.host}'
    ```
 
 2. **Test Request with PII**:
@@ -247,7 +247,7 @@ passthroughHeaders:
      }'
    
    # Using OpenShift route
-   ROUTE_URL=$(oc get route gorch-sample -n guardrails-presidio -o jsonpath='{.spec.host}')
+   ROUTE_URL=$(oc get route gorch-sample -n guardrails-demo -o jsonpath='{.spec.host}')
    curl -X POST http://${ROUTE_URL}/v1/chat/completions \
      -H "Content-Type: application/json" \
      -d '{
@@ -296,27 +296,27 @@ passthroughHeaders:
 ```bash
 # Check GuardrailsOrchestrator status
 # Kubernetes
-kubectl describe guardrailsorchestrator gorch-sample -n guardrails-presidio
+kubectl describe guardrailsorchestrator gorch-sample -n guardrails-demo
 
 # OpenShift
-oc describe guardrailsorchestrator gorch-sample -n guardrails-presidio
+oc describe guardrailsorchestrator gorch-sample -n guardrails-demo
 
 # Check orchestrator pods logs
 # Kubernetes
-kubectl logs -l app.kubernetes.io/name=guardrails-orchestrator -n guardrails-presidio
+kubectl logs -l app.kubernetes.io/name=guardrails-demo -n guardrails-demo
 
 # OpenShift
-oc logs -l app.kubernetes.io/name=guardrails-orchestrator -n guardrails-presidio
+oc logs -l app.kubernetes.io/name=guardrails-demo -n guardrails-demo
 
 # Test service connectivity
 # Kubernetes
-kubectl run test-pod --image=busybox -n guardrails-presidio --rm -it -- wget -O- presidio-analyzer.guardrails-presidio.svc.cluster.local:3000/health
+kubectl run test-pod --image=busybox -n guardrails-demo --rm -it -- wget -O- presidio-analyzer.guardrails-demo.svc.cluster.local:3000/health
 
 # OpenShift
-oc run test-pod --image=busybox -n guardrails-presidio --rm -it -- wget -O- presidio-analyzer.guardrails-presidio.svc.cluster.local:3000/health
+oc run test-pod --image=busybox -n guardrails-demo --rm -it -- wget -O- presidio-analyzer.guardrails-demo.svc.cluster.local:3000/health
 
 # OpenShift-specific: Check project status
-oc status -n guardrails-presidio
+oc status -n guardrails-demo
 
 # OpenShift-specific: View in web console
 oc console
@@ -327,23 +327,23 @@ oc console
 1. **Security Context Constraints (SCCs)**:
    ```bash
    # Check if pods need specific SCCs
-   oc get pod -n guardrails-presidio -o yaml | grep scc
+   oc get pod -n guardrails-demo -o yaml | grep scc
    
    # If needed, grant SCC to service account
-   oc adm policy add-scc-to-user anyuid -z default -n guardrails-presidio
+   oc adm policy add-scc-to-user anyuid -z default -n guardrails-demo
    ```
 
 2. **Network Policies**:
    ```bash
    # List network policies
-   oc get networkpolicy -n guardrails-presidio
+   oc get networkpolicy -n guardrails-demo
    ```
 
 3. **Resource Quotas**:
    ```bash
    # Check project quotas
-   oc describe quota -n guardrails-presidio
-   oc describe limits -n guardrails-presidio
+   oc describe quota -n guardrails-demo
+   oc describe limits -n guardrails-demo
    ```
 
 ## Chart Structure
@@ -365,11 +365,11 @@ guardrails-deployment/
 
 ```bash
 # Kubernetes
-helm uninstall trustyai-guardrails -n guardrails-presidio
+helm uninstall trustyai-guardrails -n guardrails-demo
 
 # OpenShift
-helm uninstall trustyai-guardrails -n guardrails-presidio
-oc delete project guardrails-presidio  # Optional: remove the entire project
+helm uninstall trustyai-guardrails -n guardrails-demo
+oc delete project guardrails-demo  # Optional: remove the entire project
 
 # Or if installed in a custom namespace
 helm uninstall trustyai-guardrails -n my-namespace

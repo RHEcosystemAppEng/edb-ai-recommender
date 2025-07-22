@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # Namespace configuration
-namespace: guardrails-presidio
+namespace: guardrails-demo
 
 # Orchestrator configuration
 orchestrator:
@@ -14,7 +14,7 @@ orchestrator:
 # Chat generation service configuration
 chatGeneration:
   service:
-    hostname: llama-3-1-8b-instruct-predictor.rag-demo-16.svc.cluster.local
+    hostname: llama-31-8b-instruct-predictor.llama-models.svc.cluster.local
     port: 8080
 
 # Detectors configuration
