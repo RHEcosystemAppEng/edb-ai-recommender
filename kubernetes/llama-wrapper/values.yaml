@@ -1,0 +1,22 @@
+1:replicaCount: 1
+
+image:
+  repository: quay.io/rh-ee-vli/trustyai-guardrails-llama-guard-wrapper
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3001
+
+env:
+  baseUrl: http://llama-guard-3-8b-predictor.llama-models.svc.cluster.local:8080
+  model: llama-guard-3-8b
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

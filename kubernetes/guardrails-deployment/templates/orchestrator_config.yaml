@@ -1,0 +1,45 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Values.orchestrator.configMapName }}
+  namespace: {{ .Values.namespace }}
+data:
+  config.yaml: |
+    chat_generation:
+      service:
+          hostname: {{ .Values.chatGeneration.service.hostname }}
+          port: {{ .Values.chatGeneration.service.port }}
+    detectors:
+      {{- if .Values.detectors.presidioPii.enabled }}
+      presidio-pii:
+        type: {{ .Values.detectors.presidioPii.type }}
+        service:
+          hostname: {{ .Values.detectors.presidioPii.service.hostname }}
+          port: {{ .Values.detectors.presidioPii.service.port }}
+        chunker_id: {{ .Values.detectors.presidioPii.chunker_id }}
+        default_threshold: {{ .Values.detectors.presidioPii.defaultThreshold }}
+        language: {{ .Values.detectors.presidioPii.language }}
+        headers:
+          {{- range $key, $value := .Values.detectors.presidioPii.headers }}
+          {{ $key }}: {{ $value }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.detectors.llamaGuard3.enabled }}
+      llama-guard-3:
+        type: {{ .Values.detectors.llamaGuard3.type }}
+        service:
+          hostname: {{ .Values.detectors.llamaGuard3.service.hostname }}
+          port: {{ .Values.detectors.llamaGuard3.service.port }}
+        chunker_id: {{ .Values.detectors.llamaGuard3.chunker_id }}
+        default_threshold: {{ .Values.detectors.llamaGuard3.defaultThreshold }}
+        headers:
+          {{- range $key, $value := .Values.detectors.llamaGuard3.headers }}
+          {{ $key }}: {{ $value }}
+          {{- end }}
+      {{- end }}
+    passthrough_headers:
+      {{- range .Values.passthroughHeaders }}
+      - {{ . }}
+      {{- end }}
+---

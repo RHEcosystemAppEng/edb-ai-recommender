@@ -1,0 +1,10 @@
+---
+apiVersion: trustyai.opendatahub.io/v1alpha1
+kind: GuardrailsOrchestrator
+metadata:
+  name: {{ .Values.orchestrator.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  orchestratorConfig: {{ .Values.orchestrator.configMapName | quote }}
+  replicas: {{ .Values.orchestrator.replicas }}
+---

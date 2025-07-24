@@ -1,0 +1,48 @@
+# Default values for trustyai-guardrails.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Namespace configuration
+namespace: guardrails-demo
+
+# Orchestrator configuration
+orchestrator:
+  name: gorch-sample
+  replicas: 1
+  configMapName: fms-orchestr8-config-nlp
+
+# Chat generation service configuration
+chatGeneration:
+  service:
+    hostname: llama-31-8b-instruct-predictor.llama-models.svc.cluster.local
+    port: 8080
+
+# Detectors configuration
+detectors:
+  presidioPii:
+    enabled: true
+    type: text_contents
+    service:
+      hostname: presidio-analyzer.guardrails-presidio.svc.cluster.local
+      port: 3000
+    chunker_id: whole_doc_chunker
+    defaultThreshold: 0.5
+    language: en
+    headers:
+      content-type: application/json
+  
+  llamaGuard3:
+    enabled: true
+    type: text_contents
+    service:
+      hostname: llama-guard-wrapper.guardrails-presidio.svc.cluster.local
+      port: 3001
+    chunker_id: whole_doc_chunker
+    defaultThreshold: 0.5
+    headers:
+      content-type: application/json
+
+# Passthrough headers configuration
+passthroughHeaders:
+  - content-type
+
