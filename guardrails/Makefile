@@ -81,15 +81,17 @@ uninstall-%:
 	@echo "Uninstalling $* … (ignoring errors if not installed)"
 	-$(HELM) uninstall $* --namespace $(NAMESPACE)
 
-# Convenience alias targets
 uninstall-presidio:
-	$(MAKE) uninstall-$(PRESIDIO_RELEASE)
+	@echo "Uninstalling $(PRESIDIO_RELEASE) … (ignoring errors if not installed)"
+	-$(HELM) uninstall $(PRESIDIO_RELEASE) --namespace $(NAMESPACE)
 
 uninstall-llama-guard-wrapper:
-	$(MAKE) uninstall-$(LLAMA_RELEASE)
+	@echo "Uninstalling $(LLAMA_RELEASE) … (ignoring errors if not installed)"
+	-$(HELM) uninstall $(LLAMA_RELEASE) --namespace $(NAMESPACE)
 
 uninstall-guardrails:
-	$(MAKE) uninstall-$(GUARDRAILS_RELEASE)
+	@echo "Uninstalling $(GUARDRAILS_RELEASE) … (ignoring errors if not installed)"
+	-$(HELM) uninstall $(GUARDRAILS_RELEASE) --namespace $(NAMESPACE)
 
 # --- Status ----------------------------------------------------------------
 
