@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llama-wrapper.fullname" . }}
+  labels:
+    {{- include "llama-wrapper.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "llama-wrapper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "llama-wrapper.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        env:
+        - name: LLAMA_GUARD_BASE_URL
+          value: "{{ .Values.env.baseUrl }}"
+        - name: LLAMA_GUARD_MODEL
+          value: "{{ .Values.env.model }}"
+        command: ["python", "llama-guard-wrapper.py"]
+        args:
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "{{ .Values.service.port }}"
+        - "--llama-guard-url"
+        - "$(LLAMA_GUARD_BASE_URL)"
+        - "--model"
+        - "$(LLAMA_GUARD_MODEL)"
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
