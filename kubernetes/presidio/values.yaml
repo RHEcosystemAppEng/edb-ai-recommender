@@ -11,7 +11,7 @@ deployment:
 image:
   repository: quay.io/rh-ee-vli/trustyai-guardrails-presidio-pii
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 # Service configuration
 service:
