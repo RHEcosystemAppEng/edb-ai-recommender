@@ -166,15 +166,3 @@ kubectl delete namespace presidio-demo   # optional – remove the whole project
 
 ---
 
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes and test locally.
-4. Submit a pull request.
-
----
-
-## License
-
-This project is licensed under the **Apache License 2.0**. 

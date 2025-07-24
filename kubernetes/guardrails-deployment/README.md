@@ -375,16 +375,3 @@ oc delete project guardrails-demo  # Optional: remove the entire project
 helm uninstall trustyai-guardrails -n my-namespace
 ```
 
-## Contributing
-
-To contribute to this Helm chart:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test the chart locally
-5. Submit a pull request
-
-## License
-
-This project is licensed under the Apache License 2.0. 
